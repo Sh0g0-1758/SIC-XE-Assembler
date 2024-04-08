@@ -1,0 +1,12 @@
+MNEMONIC | FORMAT | OPCODE 
+ADD      | 3/4    | 18
+AND      | 3/4    | 40
+COMP     | 3/4    | 28
+ADDR     | 2      | 90
+FIX      | 1      | C4 
+STL      | 3/4    | 14
+LDA      | 3/4    | 00
+JEQ      | 3/4    | 30
+STA      | 3/4    | 0C
+RSUB     | 3/4    | 4C
+J        | 3/4    | 3C

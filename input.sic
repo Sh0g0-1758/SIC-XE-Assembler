@@ -1,0 +1,14 @@
+COPY    START   0000
+FIRST   STL     RETADR
+        LDA     LENGTH
+        COMP    ZERO
+        JEQ     LOOP1
+        J       LOOP2
+LOOP1   LDA     OP
+        STA     LENGTH
+LOOP2   RSUB    
+ZERO    WORD    69
+RETADR  RESW    1
+OP      WORD    42
+LENGTH  RESW    1
+        END     FIRST
