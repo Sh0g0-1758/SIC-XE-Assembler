@@ -422,7 +422,6 @@ void pass1(string line)
         }
         if (tokens[1] == "EQU")
         {
-            debug(tokens[2])
             if (tokens[2] == "*")
             {
                 SYMBOL_TABLE[tokens[0]] = LOCCTR;
