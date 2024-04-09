@@ -1,8 +1,10 @@
 COPY    START   0000
         BASE    ZERO
-FIRST   +STL    RETADR
+FIRST   STL    RETADR
         +LDA    LENGTH
         LDA     =*
+EUPHY   EQU     *
+SHOGO   EQU     256
         COMP    ZERO
         LTORG
         JEQ     LOOP1

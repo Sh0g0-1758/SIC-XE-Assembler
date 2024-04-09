@@ -420,6 +420,27 @@ void pass1(string line)
             cerr << "Duplicate symbol found." << endl;
             exit(0);
         }
+        if (tokens[1] == "EQU")
+        {
+            debug(tokens[2])
+            if (tokens[2] == "*")
+            {
+                SYMBOL_TABLE[tokens[0]] = LOCCTR;
+            }
+            else
+            {
+                SYMBOL_TABLE[tokens[0]] = stoi(tokens[2]);
+            }
+            instruction.address = LOCCTR;
+            instruction.format = Format::DATA;
+            instruction.opcode.code = 0;
+            instruction.opcode.format = Format::DATA;
+            instruction.type = DataType::BYTE;
+            instruction.data = "X'" + intToHex(SYMBOL_TABLE[tokens[0]]) + "'";
+            LOCCTR += (instruction.data.size() - 3) / 2;
+            INSTRUCTIONS.push_back(instruction);
+            return;
+        }
         SYMBOL_TABLE[tokens[0]] = LOCCTR;
     }
     if (tokens[1] == "BASE")
