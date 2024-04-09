@@ -6,7 +6,8 @@ using VariantType = variant<formatOne,formatTwo,formatThree,formatFour,formatDat
 map<string,Opcode> OPTAB;
 vector<Instruction> INSTRUCTIONS;
 map<string,int> SYMBOL_TABLE;
-unordered_map<string,int> LITTAB;
+vector<pair<string,pair<string,int>>> LIT_INTERMEDIATE;
+map<string,int> LITTAB;
 
 vector<VariantType> OBJCODE;
 vector<string> RECORDS;
@@ -23,7 +24,6 @@ string BASE;
         instruction.format = Format::DATA;               \
         instruction.opcode.code = 0;                     \
         instruction.opcode.format = Format::DATA;        \
-        LOCCTR += 3;                                     \
 }
 
 void printVariant(const VariantType& v) {
@@ -281,6 +281,25 @@ void pass1(string line) {
     while(iss >> token) {
         tokens.push_back(trim(token));
     }
+    if(tokens[0] == "LTORG") {
+        for(auto it : LIT_INTERMEDIATE) {
+            LITTAB[it.first] = LOCCTR;
+            instruction.address = LOCCTR;
+            instruction.data = it.second.first;
+            instruction.format = Format::DATA;
+            instruction.opcode.code = 0;
+            instruction.opcode.format = Format::DATA;
+            instruction.type = DataType::BYTE;
+            LOCCTR += it.second.second;
+            INSTRUCTIONS.push_back(instruction);
+        }
+        LIT_INTERMEDIATE.clear();
+        return;
+    }
+    if(tokens[0] == "RSUB") {
+        tokens.insert(tokens.begin(), "");
+        tokens.push_back("");
+    }
     if(tokens[1] == "RSUB") {
         tokens.push_back("");
     }
@@ -354,7 +373,26 @@ void pass1(string line) {
     }
     instruction.opcode = OPTAB[tokens[1]];
     instruction.address = LOCCTR;
-    instruction.data = tokens[2];
+    // Checking for literals
+    if(tokens[2][0] == '=') {
+        if(LITTAB.find(tokens[2]) == LITTAB.end()) {
+            string tmp;
+            if(tokens[2][1] == 'C') {
+                tmp = tokens[2].substr(1, tokens[2].length() - 1);
+                LIT_INTERMEDIATE.push_back({tmp, {tmp, tmp.size()}});
+                instruction.data = tmp;
+            } else if(tokens[2][1] == 'X') {
+                tmp = tokens[2].substr(1, tokens[2].length() - 1);
+                LIT_INTERMEDIATE.push_back({tmp, {tmp, tmp.size() / 2}});
+                instruction.data = tmp;
+            } else {
+                cerr << "Invalid literal declaration." << endl;
+                exit(0);
+            }
+        }
+    } else {
+        instruction.data = tokens[2];
+    }
     if (instruction.format == Format::ONE) {
         LOCCTR += 1;
     } else if (instruction.format == Format::TWO) {
@@ -429,7 +467,18 @@ void pass2() {
                 obj.p = false;
                 obj.b = true;
                 obj.displacement = SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"];
+            } else if(LITTAB[it.data] - LOCCTR <= 0xFF and LITTAB[it.data] - LOCCTR >= 0) {
+                obj.p = true;
+                obj.b = false;
+                obj.displacement = LITTAB[it.data] - LOCCTR;
+            } else if(LITTAB[it.data] - SYMBOL_TABLE["BASE"] < 4095 and LITTAB[it.data] - SYMBOL_TABLE["BASE"] > 0) {
+                obj.p = false;
+                obj.b = true;
+                obj.displacement = LITTAB[it.data] - SYMBOL_TABLE["BASE"];
             } else {
+                debug(it.data)
+                debug(LITTAB[it.data])
+                debug(LOCCTR)
                 cout << "Displacement can't be reached from PC or BASE." << endl;
                 exit(0);
             }
@@ -545,13 +594,29 @@ int main() {
     while(getline(programFile, line)) {
         pass1(line);
     }
+    if(LIT_INTERMEDIATE.size() != 0) {
+        Instruction instruction;
+        for(auto it : LIT_INTERMEDIATE) {
+            LITTAB[it.first] = LOCCTR;
+            instruction.address = LOCCTR;
+            instruction.data = it.second.first;
+            instruction.format = Format::DATA;
+            instruction.opcode.code = 0;
+            instruction.opcode.format = Format::DATA;
+            instruction.type = DataType::BYTE;
+            LOCCTR += it.second.second;
+            INSTRUCTIONS.push_back(instruction);
+        }
+        LIT_INTERMEDIATE.clear();
+    }
     programFile.close();
     PROGRAM_LENGTH = LOCCTR - START_ADDRESS;
     SYMBOL_TABLE["BASE"] = SYMBOL_TABLE[BASE];
-    // cout << (SPACE);
-    // debug(SYMBOL_TABLE)
-    // debug(SPACE)
-    // debug(INSTRUCTIONS)
+    cout << (SPACE);
+    debug(SYMBOL_TABLE)
+    debug(LITTAB)
+    debug(SPACE)
+    debug(INSTRUCTIONS)
     // debug(SPACE)
     // debug(NAME)
     // debug(SPACE)
@@ -563,13 +628,13 @@ int main() {
     // debug(SPACE)
     LOCCTR = START_ADDRESS;
     pass2();
-    // for(auto it : OBJCODE) {
-    //     printVariant(it);
-    // }
+    for(auto it : OBJCODE) {
+        printVariant(it);
+    }
     for(auto it : OBJCODE) {
         generateRECORD(it);
     }
     printRECORDS();
-    // cout << (SPACE);
+    cout << (SPACE);
     exit(0);
 }
