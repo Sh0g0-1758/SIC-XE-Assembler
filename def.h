@@ -5,11 +5,11 @@ enum Register {
     A,
     X,
     L,
-    B, 
-    S, 
-    T, 
-    F, 
-    PC, 
+    B,
+    S,
+    T,
+    F,
+    PC,
     SW
 };
 
