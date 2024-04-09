@@ -1,7 +1,8 @@
-#include<string>
-#include<unordered_map>
+#include <string>
+#include <unordered_map>
 
-enum Register {
+enum Register
+{
     A,
     X,
     L,
@@ -13,7 +14,8 @@ enum Register {
     SW
 };
 
-enum Format {
+enum Format
+{
     ONE,
     TWO,
     THREE,
@@ -21,19 +23,22 @@ enum Format {
     DATA,
 };
 
-enum DataType {
+enum DataType
+{
     WORD,
     BYTE,
     RESB,
     RESW,
 };
 
-struct Opcode {
+struct Opcode
+{
     int code;
     Format format;
 };
 
-struct Instruction {
+struct Instruction
+{
     Opcode opcode;
     std::string data;
     Format format;
@@ -41,17 +46,20 @@ struct Instruction {
     int address;
 };
 
-struct formatOne {
+struct formatOne
+{
     int opcode;
 };
 
-struct formatTwo {
+struct formatTwo
+{
     int opcode;
     Register r1;
     Register r2;
 };
 
-struct formatThree {
+struct formatThree
+{
     int opcode;
     bool n;
     bool i;
@@ -62,7 +70,8 @@ struct formatThree {
     int displacement;
 };
 
-struct formatFour {
+struct formatFour
+{
     int opcode;
     bool n;
     bool i;
@@ -73,7 +82,8 @@ struct formatFour {
     int address;
 };
 
-struct formatData {
+struct formatData
+{
     int value;
     bool reserved;
     bool word;
