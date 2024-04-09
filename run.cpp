@@ -504,10 +504,12 @@ void pass2() {
             obj.e = false;
             obj.opcode = it.opcode.code;
             if (it.data[0] == '#') {
+                it.data = it.data.substr(1);
                 obj.n = false;
                 obj.i = true;
             }
             else if (it.data[0] == '@') {
+                it.data = it.data.substr(1);
                 obj.n = true;
                 obj.i = false;
             }
@@ -517,6 +519,7 @@ void pass2() {
             }
             size_t found = it.data.find(",X");
             if (found != string::npos) {
+                it.data = it.data.substr(0, found);
                 obj.x = true;
             }
             else {
