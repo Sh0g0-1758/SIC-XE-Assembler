@@ -77,6 +77,7 @@ struct formatData {
     int value;
     bool reserved;
     bool word;
+    bool loc_ctr;
 };
 
 std::string SPACE = "\n<=====================================================================>\n";

@@ -6,7 +6,7 @@ using VariantType = variant<formatOne,formatTwo,formatThree,formatFour,formatDat
 map<string,Opcode> OPTAB;
 vector<Instruction> INSTRUCTIONS;
 map<string,int> SYMBOL_TABLE;
-vector<pair<string,pair<string,int>>> LIT_INTERMEDIATE;
+vector<pair<string,int>> LIT_INTERMEDIATE;
 map<string,int> LITTAB;
 
 vector<VariantType> OBJCODE;
@@ -152,10 +152,17 @@ void generateRECORD(const VariantType& v) {
                 }
                 RECORDS.push_back(obj);
             } else {
-                while(obj.size()%2 != 0) {
-                    obj = '0' + obj;
+                if(tmp.loc_ctr) {
+                    while(obj.size() < 4) {
+                        obj = '0' + obj;
+                    }
+                    RECORDS.push_back(obj);
+                } else {
+                    while(obj.size()%2 != 0) {
+                        obj = '0' + obj;
+                    }
+                    RECORDS.push_back(obj);
                 }
-                RECORDS.push_back(obj);
             }
         }
     }
@@ -285,12 +292,12 @@ void pass1(string line) {
         for(auto it : LIT_INTERMEDIATE) {
             LITTAB[it.first] = LOCCTR;
             instruction.address = LOCCTR;
-            instruction.data = it.second.first;
+            instruction.data = it.first;
             instruction.format = Format::DATA;
             instruction.opcode.code = 0;
             instruction.opcode.format = Format::DATA;
             instruction.type = DataType::BYTE;
-            LOCCTR += it.second.second;
+            LOCCTR += it.second;
             INSTRUCTIONS.push_back(instruction);
         }
         LIT_INTERMEDIATE.clear();
@@ -379,11 +386,19 @@ void pass1(string line) {
             string tmp;
             if(tokens[2][1] == 'C') {
                 tmp = tokens[2].substr(1, tokens[2].length() - 1);
-                LIT_INTERMEDIATE.push_back({tmp, {tmp, tmp.size()}});
+                LIT_INTERMEDIATE.push_back({tmp, tmp.size() - 3});
                 instruction.data = tmp;
             } else if(tokens[2][1] == 'X') {
                 tmp = tokens[2].substr(1, tokens[2].length() - 1);
-                LIT_INTERMEDIATE.push_back({tmp, {tmp, tmp.size() / 2}});
+                LIT_INTERMEDIATE.push_back({tmp, (tmp.size() - 3) / 2});
+                instruction.data = tmp;
+            } else if(tokens[2][1] == '*') {
+                tmp = intToHex(LOCCTR);
+                while(tmp.size() != 4) {
+                    tmp = '0' + tmp;
+                }
+                tmp = "X'" + tmp + "'";
+                LIT_INTERMEDIATE.push_back({tmp, (tmp.size() - 3) / 2});
                 instruction.data = tmp;
             } else {
                 cerr << "Invalid literal declaration." << endl;
@@ -540,6 +555,9 @@ void pass2() {
                 formatData obj;
                 if(it.data[0] == 'X') {
                     LOCCTR += ((it.data.length() - 3) / 2);
+                    if(it.data.length() - 3 == 4) {
+                        obj.loc_ctr = true;
+                    }
                     obj.value = hexToInt(it.data.substr(2, it.data.length() - 3));
                 } else if (it.data[0] == 'C') {
                     LOCCTR += (it.data.length() - 3);
@@ -599,12 +617,12 @@ int main() {
         for(auto it : LIT_INTERMEDIATE) {
             LITTAB[it.first] = LOCCTR;
             instruction.address = LOCCTR;
-            instruction.data = it.second.first;
+            instruction.data = it.first;
             instruction.format = Format::DATA;
             instruction.opcode.code = 0;
             instruction.opcode.format = Format::DATA;
             instruction.type = DataType::BYTE;
-            LOCCTR += it.second.second;
+            LOCCTR += it.second;
             INSTRUCTIONS.push_back(instruction);
         }
         LIT_INTERMEDIATE.clear();
