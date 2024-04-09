@@ -1,7 +1,7 @@
 COPY    START   0000
         BASE    ZERO
-FIRST   STL     RETADR
-        LDA     LENGTH
+FIRST   +STL     RETADR
+        +LDA     LENGTH
         COMP    ZERO
         JEQ     LOOP1
         J       LOOP2

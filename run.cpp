@@ -6,9 +6,11 @@ using VariantType = variant<formatOne,formatTwo,formatThree,formatFour,formatDat
 map<string,Opcode> OPTAB;
 vector<Instruction> INSTRUCTIONS;
 map<string,int> SYMBOL_TABLE;
+unordered_map<string,int> LITTAB;
 
 vector<VariantType> OBJCODE;
 vector<string> RECORDS;
+vector<string> MRECORDS;
 string NAME;
 int START_ADDRESS;
 int LOCCTR;
@@ -132,7 +134,7 @@ void generateRECORD(const VariantType& v) {
         }
         string tmp2 = intToHex((tmp.x ? 8 : 0) + (tmp.b ? 4 : 0) + (tmp.p ? 2 : 0) + (tmp.e ? 1 : 0));
         string tmp3 = intToHex(tmp.address);
-        while(tmp3.size() != 3) {
+        while(tmp3.size() != 5) {
             tmp3 = '0' + tmp3;
         }
         string obj = tmp1 + tmp2 + tmp3;
@@ -212,6 +214,9 @@ void printRECORDS() {
         tmp = '0' + tmp;
     }
     cout << tmp << endl;
+    for(auto it : MRECORDS) {
+        cout << it << endl;
+    }
 }
 
 void pre_process(string line) {
@@ -332,7 +337,12 @@ void pass1(string line) {
         
         INSTRUCTIONS.push_back(instruction);
         return;
-    } else if(OPTAB.find(tokens[1]) == OPTAB.end()) {
+    } else if (tokens[1][0] == '+') {
+        if(OPTAB.find(tokens[1].substr(1)) == OPTAB.end()) {
+            cerr << "Invalid opcode." << endl;
+            exit(0);
+        }
+    } else if (OPTAB.find(tokens[1]) == OPTAB.end()) {
         cerr << "Invalid opcode." << endl;
         exit(0);
     }
@@ -425,6 +435,12 @@ void pass2() {
             }
             OBJCODE.push_back(obj);
         } else if (it.format == Format::FOUR) {
+            string addr = intToHex(LOCCTR + 1);
+            while(addr.size() != 6) {
+                addr = '0' + addr;
+            }
+            addr = 'M' + addr + "05";
+            MRECORDS.push_back(addr);
             LOCCTR+=4;
             formatFour obj;
             obj.opcode = it.opcode.code;
