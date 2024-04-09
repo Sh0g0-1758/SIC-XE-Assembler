@@ -16,6 +16,7 @@ string NAME;
 int START_ADDRESS;
 int LOCCTR;
 int PROGRAM_LENGTH;
+bool NOBASE = false;
 string BASE;
 
 #define data_directive() {                               \
@@ -288,6 +289,10 @@ void pass1(string line) {
     while(iss >> token) {
         tokens.push_back(trim(token));
     }
+    if(tokens[0] == "NOBASE") {
+        NOBASE = true;
+        return;
+    }
     if(tokens[0] == "LTORG") {
         for(auto it : LIT_INTERMEDIATE) {
             LITTAB[it.first] = LOCCTR;
@@ -328,7 +333,15 @@ void pass1(string line) {
         SYMBOL_TABLE[tokens[0]] = LOCCTR;
     }
     if(tokens[1] == "BASE") {
-        BASE = tokens[2];
+        if(tokens[2] == "*") {
+            string temp = intToHex(LOCCTR);
+            while(temp.size() < 4) {
+                temp = '0' + temp;
+            }
+            BASE = "*" + temp;
+        } else {
+            BASE = tokens[2];
+        }
         return;
     }
     if(tokens[1] == "WORD") {
@@ -486,7 +499,7 @@ void pass2() {
                 obj.p = true;
                 obj.b = false;
                 obj.displacement = LITTAB[it.data] - LOCCTR;
-            } else if(LITTAB[it.data] - SYMBOL_TABLE["BASE"] < 4095 and LITTAB[it.data] - SYMBOL_TABLE["BASE"] > 0) {
+            } else if(LITTAB[it.data] - SYMBOL_TABLE["BASE"] < 4095 and LITTAB[it.data] - SYMBOL_TABLE["BASE"] > 0 and !NOBASE) {
                 obj.p = false;
                 obj.b = true;
                 obj.displacement = LITTAB[it.data] - SYMBOL_TABLE["BASE"];
@@ -629,7 +642,12 @@ int main() {
     }
     programFile.close();
     PROGRAM_LENGTH = LOCCTR - START_ADDRESS;
-    SYMBOL_TABLE["BASE"] = SYMBOL_TABLE[BASE];
+    if(BASE[0] == '*') {
+        BASE = BASE.substr(1);
+        SYMBOL_TABLE["BASE"] = hexToInt(BASE);
+    } else {
+        SYMBOL_TABLE["BASE"] = SYMBOL_TABLE[BASE];
+    }
     cout << (SPACE);
     debug(SYMBOL_TABLE)
     debug(LITTAB)
