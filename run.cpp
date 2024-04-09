@@ -8,6 +8,7 @@ vector<Instruction> INSTRUCTIONS;
 map<string,int> SYMBOL_TABLE;
 
 vector<VariantType> OBJCODE;
+vector<string> RECORDS;
 string NAME;
 int START_ADDRESS;
 int LOCCTR;
@@ -95,13 +96,13 @@ string stringToHex(const string& input) {
     return hexString;
 }
 
-void printOBJ(const VariantType& v) {
+void generateRECORD(const VariantType& v) {
     if (holds_alternative<formatOne>(v)) {
         string obj = intToHex(get<formatOne>(v).opcode);
         while(obj.size() != 2) {
             obj = '0' + obj;
         }
-        debug(obj)
+        RECORDS.push_back(obj);
     } else if (holds_alternative<formatTwo>(v)) {
         formatTwo tmp = get<formatTwo>(v);
         string tmp1 = intToHex(tmp.opcode);
@@ -109,7 +110,7 @@ void printOBJ(const VariantType& v) {
             tmp1 = '0' + tmp1;
         }
         string obj = tmp1 + intToHex(tmp.r1) + intToHex(tmp.r2);
-        debug(obj);
+        RECORDS.push_back(obj);
     } else if (holds_alternative<formatThree>(v)) {
         formatThree tmp = get<formatThree>(v);
         string tmp1 = intToHex(tmp.opcode + (tmp.n ? 2 : 0) + (tmp.i ? 1 : 0));
@@ -122,7 +123,7 @@ void printOBJ(const VariantType& v) {
             tmp3 = '0' + tmp3;
         }
         string obj = tmp1 + tmp2 + tmp3;
-        debug(obj)
+        RECORDS.push_back(obj);
     } else if(holds_alternative<formatFour>(v)) {
         formatFour tmp = get<formatFour>(v);
         string tmp1 = intToHex(tmp.opcode + (tmp.n ? 2 : 0) + (tmp.i ? 1 : 0));
@@ -135,24 +136,82 @@ void printOBJ(const VariantType& v) {
             tmp3 = '0' + tmp3;
         }
         string obj = tmp1 + tmp2 + tmp3;
-        debug(obj)
+        RECORDS.push_back(obj);
     } else if(holds_alternative<formatData>(v)) {
         formatData tmp = get<formatData>(v);
         if(tmp.reserved) {
-            cout << "Skipping the LOCCTR by this amount> " << endl;
-            debug(tmp.value)
+            RECORDS.push_back("SKIP");
+            RECORDS.push_back(to_string(tmp.value));
         } else {
             string obj = intToHex(tmp.value);
             if(tmp.word) {
                 while(obj.size()%6 != 0) {
                     obj = '0' + obj;
                 }
-                debug(obj)
+                RECORDS.push_back(obj);
             } else {
-                debug(obj)
+                while(obj.size()%2 != 0) {
+                    obj = '0' + obj;
+                }
+                RECORDS.push_back(obj);
             }
         }
     }
+}
+
+void printRECORDS() {
+    debug(RECORDS)
+    cout << SPACE << endl;
+    LOCCTR = START_ADDRESS;
+    cout << "H";
+    while(NAME.size() != 6) {
+        NAME += ' ';
+    }
+    cout << NAME;
+    string tmp = intToHex(START_ADDRESS);
+    while(tmp.size() != 6) {
+        tmp = '0' + tmp;
+    }
+    cout << tmp;
+    tmp = intToHex(PROGRAM_LENGTH);
+    while(tmp.size() != 6) {
+        tmp = '0' + tmp;
+    }
+    cout << tmp << endl;
+    for(ll i = 0; i < RECORDS.size(); i++) {
+        ll max_text_len = 0x1E;
+        ll cnt = 0;
+        string record;
+        while(i < RECORDS.size() and RECORDS[i] != "SKIP" and cnt + ((RECORDS[i].size())/2) <= max_text_len) {
+            cnt += ((RECORDS[i].size()) / 2);
+            record += RECORDS[i];
+            i++;
+        }
+        cout << "T";
+        tmp = intToHex(LOCCTR);
+        while(tmp.size() != 6) {
+            tmp = '0' + tmp;
+        }
+        cout << tmp;
+        tmp = intToHex(cnt);
+        while(tmp.size() != 2) {
+            tmp = '0' + tmp;
+        }
+        cout << tmp;
+        cout << record;
+        LOCCTR += cnt;
+        cout << endl;
+        if(RECORDS[i] == "SKIP") {
+            i++;
+            LOCCTR += stoi(RECORDS[i]);
+        }
+    }
+    cout << "E";
+    tmp = intToHex(START_ADDRESS);
+    while(tmp.size() != 6) {
+        tmp = '0' + tmp;
+    }
+    cout << tmp << endl;
 }
 
 void pre_process(string line) {
@@ -473,7 +532,7 @@ int main() {
     programFile.close();
     PROGRAM_LENGTH = LOCCTR - START_ADDRESS;
     SYMBOL_TABLE["BASE"] = SYMBOL_TABLE[BASE];
-    cout << (SPACE);
+    // cout << (SPACE);
     // debug(SYMBOL_TABLE)
     // debug(SPACE)
     // debug(INSTRUCTIONS)
@@ -492,8 +551,9 @@ int main() {
     //     printVariant(it);
     // }
     for(auto it : OBJCODE) {
-        printOBJ(it);
+        generateRECORD(it);
     }
-    cout << (SPACE);
+    printRECORDS();
+    // cout << (SPACE);
     exit(0);
 }

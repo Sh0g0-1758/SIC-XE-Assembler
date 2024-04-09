@@ -1,4 +1,5 @@
 COPY    START   0000
+        BASE    ZERO
 FIRST   STL     RETADR
         LDA     LENGTH
         COMP    ZERO
@@ -11,4 +12,5 @@ ZERO    WORD    69
 RETADR  RESW    1
 OP      WORD    42
 LENGTH  RESW    1
+TEST    BYTE    X'05'
         END     FIRST
