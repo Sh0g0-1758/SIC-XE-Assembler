@@ -90,6 +90,11 @@ int hexToInt(const string &hexString)
     return value;
 }
 
+bool is_digits(const string& str) {
+  return all_of(str.begin(), str.end(), ::isdigit);
+}
+
+
 pair<string, string> get_registers(const string &inputString)
 {
     istringstream iss(inputString);
@@ -426,9 +431,14 @@ void pass1(string line)
             {
                 SYMBOL_TABLE[tokens[0]] = LOCCTR;
             }
-            else
-            {
+            else if (SYMBOL_TABLE.find(tokens[2]) != SYMBOL_TABLE.end()) {
+                SYMBOL_TABLE[tokens[0]] = SYMBOL_TABLE[tokens[2]];
+            } else if(is_digits(tokens[2])) {
                 SYMBOL_TABLE[tokens[0]] = stoi(tokens[2]);
+            } else
+            {
+                cout << "INVALID EQU ARGUMENT." << endl;
+                exit(0);
             }
             instruction.address = LOCCTR;
             instruction.format = Format::DATA;
