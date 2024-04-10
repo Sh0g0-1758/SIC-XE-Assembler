@@ -1,7 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
 #include "def.h"
 #include "debug.h"

@@ -1,7 +1,7 @@
 #ifndef PASS2_H
 #define PASS2_H
 
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
 #include "utils.h"
 #include "def.h"

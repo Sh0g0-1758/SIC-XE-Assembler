@@ -28,7 +28,7 @@ int prevLOCCTR;
 string BASE;
 
 int main()
-{   
+{
     // Processing the opcodes
     ifstream opcodeFile("../opcode.info");
     if (!opcodeFile.is_open())
@@ -88,9 +88,9 @@ int main()
         SYMBOL_TABLE["BASE"] = SYMBOL_TABLE[BASE];
     }
     // cout << (SPACE);
-    // debug(SYMBOL_TABLE); 
-    // debug(LITTAB); 
-    // debug(SPACE); 
+    // debug(SYMBOL_TABLE);
+    // debug(LITTAB);
+    // debug(SPACE);
     // debug(INSTRUCTIONS);
     // debug(SPACE)
     // debug(NAME)
