@@ -114,6 +114,7 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
 
 string GETRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> &RECORDS, int &PROGRAM_LENGTH, vector<string> &MRECORDS)
 {
+    debug(RECORDS)
     string RECORD = "";
     LOCCTR = START_ADDRESS;
     RECORD += "H";
@@ -163,11 +164,20 @@ string GETRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> 
         RECORD += record;
         LOCCTR += cnt;
         RECORD += "\n";
-        if (RECORDS[i] == "SKIP")
+        while (RECORDS[i] == "SKIP" and i < RECORDS.size())
         {
             i++;
             LOCCTR += stoi(RECORDS[i]);
+            if(i + 1 < RECORDS.size() and RECORDS[i + 1] == "SKIP")
+            {
+                i++;
+            }
         }
+    }
+    for (auto it : MRECORDS)
+    {
+        RECORD += it;
+        RECORD += "\n";
     }
     RECORD += "E";
     tmp = intToHex(START_ADDRESS);
@@ -177,11 +187,6 @@ string GETRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> 
     }
     RECORD += tmp;
     RECORD += "\n";
-    for (auto it : MRECORDS)
-    {
-        RECORD += it;
-        RECORD += "\n";
-    }
     return RECORD;
 }
 

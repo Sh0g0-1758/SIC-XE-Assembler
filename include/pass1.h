@@ -339,6 +339,7 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
     }
     else if (OPTAB.find(tokens[1]) == OPTAB.end())
     {
+        debug(tokens)
         cerr << "Invalid opcode." << endl;
         exit(0);
     }

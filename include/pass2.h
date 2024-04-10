@@ -89,15 +89,20 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
             }
             else if (SYMBOL_TABLE.find(it.data) != SYMBOL_TABLE.end())
             {
-                if (SYMBOL_TABLE[it.data] - LOCCTR < 2047 and SYMBOL_TABLE[it.data] - LOCCTR > -2048)
+                debug(it.data);
+                debug(SYMBOL_TABLE[it.data]);
+                debug(LOCCTR);
+                debug(SYMBOL_TABLE["BASE"]);
+                if (SYMBOL_TABLE[it.data] - LOCCTR < 2047 and SYMBOL_TABLE[it.data] - LOCCTR >= -2048)
                 {
-                    debug(it.data)
-                        obj.p = true;
+                    obj.p = true;
                     obj.b = false;
                     obj.displacement = SYMBOL_TABLE[it.data] - LOCCTR;
                 }
-                else if (SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"] < 4095 and SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"] > 0 and !NOBASE)
+                else if (SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"] < 4095 and SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"] >= 0 and !NOBASE)
                 {
+                    debug(it.data);
+                    cout << "BASE" << endl;
                     obj.p = false;
                     obj.b = true;
                     obj.displacement = SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"];
@@ -106,14 +111,14 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
             else if (LITTAB.find(it.data) != LITTAB.end())
             {
                 if (LITTAB[it.data] - LOCCTR < 2047 and
-                    LITTAB[it.data] - LOCCTR > -2048)
+                    LITTAB[it.data] - LOCCTR >= -2048)
                 {
                     obj.p = true;
                     obj.b = false;
                     obj.displacement = LITTAB[it.data] - LOCCTR;
                 }
                 else if (LITTAB[it.data] - SYMBOL_TABLE["BASE"] < 4095 and
-                         LITTAB[it.data] - SYMBOL_TABLE["BASE"] > 0 and !NOBASE)
+                         LITTAB[it.data] - SYMBOL_TABLE["BASE"] >= 0 and !NOBASE)
                 {
                     obj.p = false;
                     obj.b = true;
@@ -182,7 +187,7 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
             }
             else if (SYMBOL_TABLE.find(it.data) != SYMBOL_TABLE.end())
             {
-                if (SYMBOL_TABLE[it.data] > 0 and SYMBOL_TABLE[it.data] < 0xFFFFF)
+                if (SYMBOL_TABLE[it.data] >= 0 and SYMBOL_TABLE[it.data] < 0xFFFFF)
                 {
                     obj.address = SYMBOL_TABLE[it.data];
                 }

@@ -3,8 +3,8 @@ FIRST   LDX     #0
         LDA     #0
         +LDB    #TABLE2
         BASE    TABLE2
-LOOP    ADD     TABLE, X
-        ADD     TABLE2, X
+LOOP    ADD     TABLE,X
+        ADD     TABLE2,X
         TIX     COUNT
         JLT     LOOP
         +STA    TOTAL
