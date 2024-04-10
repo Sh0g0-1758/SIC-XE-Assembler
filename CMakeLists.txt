@@ -6,3 +6,5 @@ include_directories(include)
 file(GLOB SOURCES "src/assembler.cpp")
 
 add_executable(assembler ${SOURCES})
+
+add_subdirectory(tests)

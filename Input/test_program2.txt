@@ -1,0 +1,13 @@
+SUM     START   0
+FIRST   LDA     ZERO
+        LDX     =X'01'
+        ADDR    X,A
+        RSUB
+        LTORG
+ZERO    WORD    0
+        END     FIRST
+
+. Expected Output: 
+. HSUM   00000000000F
+. T0000000F03200907200590104F000001000000
+. E000000

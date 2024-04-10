@@ -65,6 +65,19 @@ string trim(const string &str)
     return result;
 }
 
+void remove_whitespaces(string &str)
+{
+    size_t start = str.find_first_not_of(" \t\n\r");
+
+    if (start == string::npos)
+    {
+        str.clear();
+        return;
+    }
+    size_t end = str.find_last_not_of(" \t\n\r");
+    str = str.substr(start, end - start + 1);
+}
+
 string intToHex(int value)
 {
     stringstream stream;
@@ -80,6 +93,31 @@ int hexToInt(const string &hexString)
     return value;
 }
 
+string getLastThreeCharacters(const string &str)
+{
+    if (str.length() >= 3)
+    {
+        return str.substr(str.length() - 3);
+    }
+    else
+    {
+        return str;
+    }
+}
+
+void removeNewlines(string &str)
+{
+    size_t lastNonNewline = str.find_last_not_of("\n");
+    if (lastNonNewline != string::npos)
+    {
+        str = str.substr(0, lastNonNewline + 1);
+    }
+    else
+    {
+        str.clear();
+    }
+}
+
 vector<string> getExpressionTokens(const string &expression)
 {
     vector<string> tokens;
@@ -88,7 +126,7 @@ vector<string> getExpressionTokens(const string &expression)
 
     while (iss >> token)
     {
-        if (token.find('*') != std::string::npos || token.find('/') != std::string::npos)
+        if (token.find('*') != string::npos || token.find('/') != string::npos)
         {
             cerr << "Invalid expression." << endl;
             exit(0);

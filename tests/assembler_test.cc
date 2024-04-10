@@ -1,0 +1,30 @@
+#include <gtest/gtest.h>
+#include <bits/stdc++.h>
+using namespace std;
+
+bool compareFiles(const string& filePath1, const string& filePath2) {
+    ifstream file1(filePath1);
+    ifstream file2(filePath2);
+    if (!file1.is_open() || !file2.is_open()) {
+        return false;
+    }
+    string line1, line2;
+    while (getline(file1, line1) and getline(file2, line2)) {
+        if (line1 != line2) {
+            return false;
+        }
+    }
+    getline(file2, line2);
+    return (file1.eof() && file2.eof());
+}
+
+TEST(FileComparisonTest, CompareFiles) {
+    string filePath1 = "./../../Output/test_program1_expected.txt";
+    string filePath2 = "./../../Output/test_program1_generated.txt";
+    ASSERT_TRUE(compareFiles(filePath1, filePath2));
+}
+
+int main(int argc, char** argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

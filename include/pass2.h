@@ -52,6 +52,8 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
                 it.data = it.data.substr(1);
                 obj.n = false;
                 obj.i = true;
+                obj.p = false;
+                obj.b = false;
             }
             else if (it.data[0] == '@')
             {
@@ -85,36 +87,42 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
                     obj.displacement = stoi(it.data);
                 }
             }
-            else if (SYMBOL_TABLE[it.data] - LOCCTR <= 0xFFF and SYMBOL_TABLE[it.data] - LOCCTR >= 0)
+            else if (SYMBOL_TABLE.find(it.data) != SYMBOL_TABLE.end())
             {
-                obj.p = true;
-                obj.b = false;
-                obj.displacement = SYMBOL_TABLE[it.data] - LOCCTR;
+                if (SYMBOL_TABLE[it.data] - LOCCTR < 2047 and SYMBOL_TABLE[it.data] - LOCCTR > -2048)
+                {
+                    debug(it.data)
+                        obj.p = true;
+                    obj.b = false;
+                    obj.displacement = SYMBOL_TABLE[it.data] - LOCCTR;
+                }
+                else if (SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"] < 4095 and SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"] > 0 and !NOBASE)
+                {
+                    obj.p = false;
+                    obj.b = true;
+                    obj.displacement = SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"];
+                }
             }
-            else if (SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"] < 4095 and SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"] > 0)
+            else if (LITTAB.find(it.data) != LITTAB.end())
             {
-                obj.p = false;
-                obj.b = true;
-                obj.displacement = SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"];
-            }
-            else if (LITTAB[it.data] - LOCCTR <= 0xFF and
-                     LITTAB[it.data] - LOCCTR >= 0)
-            {
-                obj.p = true;
-                obj.b = false;
-                obj.displacement = LITTAB[it.data] - LOCCTR;
-            }
-            else if (LITTAB[it.data] - SYMBOL_TABLE["BASE"] < 4095 and
-                     LITTAB[it.data] - SYMBOL_TABLE["BASE"] > 0 and !NOBASE)
-            {
-                obj.p = false;
-                obj.b = true;
-                obj.displacement = LITTAB[it.data] - SYMBOL_TABLE["BASE"];
+                if (LITTAB[it.data] - LOCCTR < 2047 and
+                    LITTAB[it.data] - LOCCTR > -2048)
+                {
+                    obj.p = true;
+                    obj.b = false;
+                    obj.displacement = LITTAB[it.data] - LOCCTR;
+                }
+                else if (LITTAB[it.data] - SYMBOL_TABLE["BASE"] < 4095 and
+                         LITTAB[it.data] - SYMBOL_TABLE["BASE"] > 0 and !NOBASE)
+                {
+                    obj.p = false;
+                    obj.b = true;
+                    obj.displacement = LITTAB[it.data] - SYMBOL_TABLE["BASE"];
+                }
             }
             else
             {
-                debug(it.data) debug(LITTAB[it.data]) debug(LOCCTR) cout
-                    << "Displacement can't be reached from PC or BASE." << endl;
+                cout << "Displacement can't be reached from PC or BASE." << endl;
                 exit(0);
             }
             OBJCODE.push_back(obj);
@@ -172,9 +180,12 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
                     obj.address = stoi(it.data);
                 }
             }
-            else if (SYMBOL_TABLE[it.data] > 0 and SYMBOL_TABLE[it.data] < 0xFFFFF)
+            else if (SYMBOL_TABLE.find(it.data) != SYMBOL_TABLE.end())
             {
-                obj.address = SYMBOL_TABLE[it.data];
+                if (SYMBOL_TABLE[it.data] > 0 and SYMBOL_TABLE[it.data] < 0xFFFFF)
+                {
+                    obj.address = SYMBOL_TABLE[it.data];
+                }
             }
             else
             {

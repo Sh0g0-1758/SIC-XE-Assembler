@@ -41,7 +41,9 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
         }
         string tmp2 = intToHex((tmp.x ? 8 : 0) + (tmp.b ? 4 : 0) + (tmp.p ? 2 : 0) +
                                (tmp.e ? 1 : 0));
-        string tmp3 = intToHex(tmp.displacement);
+        debug(tmp.displacement)
+            string tmp3 = intToHex(tmp.displacement);
+        tmp3 = getLastThreeCharacters(tmp3);
         while (tmp3.size() != 3)
         {
             tmp3 = '0' + tmp3;
@@ -60,7 +62,7 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
         string tmp2 = intToHex((tmp.x ? 8 : 0) + (tmp.b ? 4 : 0) + (tmp.p ? 2 : 0) +
                                (tmp.e ? 1 : 0));
         string tmp3 = intToHex(tmp.address);
-        while (tmp3.size() != 5)
+        while (tmp3.size() < 5)
         {
             tmp3 = '0' + tmp3;
         }
@@ -110,27 +112,29 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
     return;
 }
 
-void printRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> &RECORDS, int &PROGRAM_LENGTH, vector<string> &MRECORDS)
+string GETRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> &RECORDS, int &PROGRAM_LENGTH, vector<string> &MRECORDS)
 {
+    string RECORD = "";
     LOCCTR = START_ADDRESS;
-    cout << "H";
+    RECORD += "H";
     while (NAME.size() != 6)
     {
         NAME += ' ';
     }
-    cout << NAME;
+    RECORD += NAME;
     string tmp = intToHex(START_ADDRESS);
     while (tmp.size() != 6)
     {
         tmp = '0' + tmp;
     }
-    cout << tmp;
+    RECORD += tmp;
     tmp = intToHex(PROGRAM_LENGTH);
     while (tmp.size() != 6)
     {
         tmp = '0' + tmp;
     }
-    cout << tmp << endl;
+    RECORD += tmp;
+    RECORD += "\n";
     for (ll i = 0; i < RECORDS.size(); i++)
     {
         ll max_text_len = 0x1E;
@@ -143,40 +147,42 @@ void printRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> 
             record += RECORDS[i];
             i++;
         }
-        cout << "T";
+        RECORD += "T";
         tmp = intToHex(LOCCTR);
         while (tmp.size() != 6)
         {
             tmp = '0' + tmp;
         }
-        cout << tmp;
+        RECORD += tmp;
         tmp = intToHex(cnt);
         while (tmp.size() != 2)
         {
             tmp = '0' + tmp;
         }
-        cout << tmp;
-        cout << record;
+        RECORD += tmp;
+        RECORD += record;
         LOCCTR += cnt;
-        cout << endl;
+        RECORD += "\n";
         if (RECORDS[i] == "SKIP")
         {
             i++;
             LOCCTR += stoi(RECORDS[i]);
         }
     }
-    cout << "E";
+    RECORD += "E";
     tmp = intToHex(START_ADDRESS);
     while (tmp.size() != 6)
     {
         tmp = '0' + tmp;
     }
-    cout << tmp << endl;
+    RECORD += tmp;
+    RECORD += "\n";
     for (auto it : MRECORDS)
     {
-        cout << it << endl;
+        RECORD += it;
+        RECORD += "\n";
     }
-    return;
+    return RECORD;
 }
 
 #endif

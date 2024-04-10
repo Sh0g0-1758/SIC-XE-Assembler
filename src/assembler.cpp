@@ -30,7 +30,7 @@ string BASE;
 int main()
 {
     // Processing the opcodes
-    ifstream opcodeFile("../opcode.info");
+    ifstream opcodeFile("../data/opcode.info");
     if (!opcodeFile.is_open())
     {
         cerr << "Failed to open the file." << endl;
@@ -46,7 +46,10 @@ int main()
     // debug(OPTAB);
 
     // First pass of the assembler
-    ifstream programFile("../input.sic");
+    string File_Name;
+    cout << "Enter the file path> ";
+    cin >> File_Name;
+    ifstream programFile(File_Name);
     if (!programFile.is_open())
     {
         cerr << "Failed to open the file." << endl;
@@ -57,8 +60,14 @@ int main()
     while (getline(programFile, line))
     {
         handle_comments(line);
+        remove_whitespaces(line);
+        if (line.empty())
+        {
+            continue;
+        }
         pass1(line, NOBASE, LIT_INTERMEDIATE, LITTAB, LOCCTR, INSTRUCTIONS, SYMBOL_TABLE, SYMBOL_FLAG, START_ADDRESS, ORG, MRECORDS, OPTAB, BASE, prevLOCCTR);
     }
+    cout << 1 << endl;
     if (LIT_INTERMEDIATE.size() != 0)
     {
         Instruction instruction;
@@ -88,31 +97,46 @@ int main()
     {
         SYMBOL_TABLE["BASE"] = SYMBOL_TABLE[BASE];
     }
-    // cout << (SPACE);
-    // debug(SYMBOL_TABLE);
-    // debug(LITTAB);
-    // debug(SPACE);
-    // debug(INSTRUCTIONS);
-    // debug(SPACE)
-    // debug(NAME)
-    // debug(SPACE)
-    // debug(START_ADDRESS)
-    // debug(SPACE)
-    // debug(LOCCTR)
-    // debug(SPACE)
-    // debug(PROGRAM_LENGTH)
-    // debug(SPACE)
-    LOCCTR = START_ADDRESS;
+    cout << (SPACE);
+    debug(SYMBOL_TABLE);
+    debug(LITTAB);
+    debug(SPACE);
+    debug(INSTRUCTIONS);
+    debug(SPACE)
+        debug(NAME)
+            debug(SPACE)
+                debug(START_ADDRESS)
+                    debug(SPACE)
+                        debug(LOCCTR)
+                            debug(SPACE)
+                                debug(PROGRAM_LENGTH)
+                                    debug(SPACE)
+                                        LOCCTR = START_ADDRESS;
     pass2(INSTRUCTIONS, OBJCODE, LOCCTR, LITTAB, SYMBOL_TABLE, NOBASE, MRECORDS);
-    // for (auto it : OBJCODE)
-    // {
-    //     printVariant(it);
-    // }
+    for (auto it : OBJCODE)
+    {
+        printVariant(it);
+    }
+    cout << "DONE" << endl;
     for (auto it : OBJCODE)
     {
         generateRECORDS(it, RECORDS);
     }
-    printRECORDS(LOCCTR, START_ADDRESS, NAME, RECORDS, PROGRAM_LENGTH, MRECORDS);
-    // cout << (SPACE);
+    string ASSEMBLER_RECORD = GETRECORDS(LOCCTR, START_ADDRESS, NAME, RECORDS, PROGRAM_LENGTH, MRECORDS);
+    removeNewlines(ASSEMBLER_RECORD);
+    File_Name = "./../Output/test_program1_generated.txt";
+    ofstream outputFile(File_Name);
+
+    if (!outputFile.is_open())
+    {
+        cerr << "Failed to open the file." << endl;
+        return 1;
+    }
+    outputFile << ASSEMBLER_RECORD << endl;
+    outputFile.close();
+
+    cout << "The HEADER Record has been successfully generated." << endl;
+
+    cout << (SPACE);
     exit(0);
 }

@@ -1,0 +1,11 @@
+PROGA   START   0
+        EXTDEF  VALA
+        EXTREF  VALB,VALC
+REF1    +LDA    VALB+VALD
+REF2    LDT     VALA
+REF3    +LDX    VALC
+        RSUB 
+VALA    WORD    0
+REF4    WORD    VALA-VALB+10
+        END     REF1
+
