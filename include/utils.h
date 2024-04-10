@@ -118,6 +118,16 @@ void removeNewlines(string &str)
     }
 }
 
+string get_file_name(string filePath) {
+    size_t lastSlashPos = filePath.find_last_of('/');
+    if (lastSlashPos == string::npos) {
+        cerr << "Invalid file path." << endl;
+        exit(0);
+    }
+    string extractedString = filePath.substr(lastSlashPos + 1, filePath.find(".txt") - lastSlashPos - 1);
+    return extractedString;
+}
+
 vector<string> getExpressionTokens(const string &expression)
 {
     vector<string> tokens;

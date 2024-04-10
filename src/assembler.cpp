@@ -124,7 +124,7 @@ int main()
     }
     string ASSEMBLER_RECORD = GETRECORDS(LOCCTR, START_ADDRESS, NAME, RECORDS, PROGRAM_LENGTH, MRECORDS);
     removeNewlines(ASSEMBLER_RECORD);
-    File_Name = "./../Output/test_program1_generated.txt";
+    File_Name = "./../Output/" + get_file_name(File_Name) + "_generated.txt";
     ofstream outputFile(File_Name);
 
     if (!outputFile.is_open())

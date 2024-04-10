@@ -18,9 +18,15 @@ bool compareFiles(const string& filePath1, const string& filePath2) {
     return (file1.eof() && file2.eof());
 }
 
-TEST(FileComparisonTest, CompareFiles) {
+TEST(Program1_Test, CompareFiles) {
     string filePath1 = "./../../Output/test_program1_expected.txt";
     string filePath2 = "./../../Output/test_program1_generated.txt";
+    ASSERT_TRUE(compareFiles(filePath1, filePath2));
+}
+
+TEST(Program2_Test, CompareFiles) {
+    string filePath1 = "./../../Output/test_program2_expected.txt";
+    string filePath2 = "./../../Output/test_program2_generated.txt";
     ASSERT_TRUE(compareFiles(filePath1, filePath2));
 }
 
