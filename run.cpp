@@ -17,6 +17,8 @@ int START_ADDRESS;
 int LOCCTR;
 int PROGRAM_LENGTH;
 bool NOBASE = false;
+bool ORG = false;
+int prevLOCCTR;
 string BASE;
 
 #define data_directive()                          \
@@ -90,10 +92,15 @@ int hexToInt(const string &hexString)
     return value;
 }
 
-bool is_digits(const string& str) {
-  return all_of(str.begin(), str.end(), ::isdigit);
+bool is_digits(const string &str)
+{
+    return all_of(str.begin(), str.end(), ::isdigit);
 }
 
+bool custom_sort(Instruction a, Instruction b)
+{
+    return a.address < b.address;
+}
 
 pair<string, string> get_registers(const string &inputString)
 {
@@ -431,11 +438,15 @@ void pass1(string line)
             {
                 SYMBOL_TABLE[tokens[0]] = LOCCTR;
             }
-            else if (SYMBOL_TABLE.find(tokens[2]) != SYMBOL_TABLE.end()) {
+            else if (SYMBOL_TABLE.find(tokens[2]) != SYMBOL_TABLE.end())
+            {
                 SYMBOL_TABLE[tokens[0]] = SYMBOL_TABLE[tokens[2]];
-            } else if(is_digits(tokens[2])) {
+            }
+            else if (is_digits(tokens[2]))
+            {
                 SYMBOL_TABLE[tokens[0]] = stoi(tokens[2]);
-            } else
+            }
+            else
             {
                 cout << "INVALID EQU ARGUMENT." << endl;
                 exit(0);
@@ -451,6 +462,30 @@ void pass1(string line)
             return;
         }
         SYMBOL_TABLE[tokens[0]] = LOCCTR;
+    }
+    if (tokens[1] == "ORG")
+    {
+        if (!ORG)
+        {
+            ORG = true;
+            prevLOCCTR = LOCCTR;
+            if (SYMBOL_TABLE.find(tokens[2]) != SYMBOL_TABLE.end())
+            {
+                LOCCTR = SYMBOL_TABLE[tokens[2]];
+            }
+            else
+            {
+                cerr << "Invalid ORG argument." << endl;
+                exit(0);
+            }
+            LOCCTR = SYMBOL_TABLE[tokens[2]];
+            return;
+        }
+        else
+        {
+            LOCCTR = prevLOCCTR;
+            ORG = false;
+        }
     }
     if (tokens[1] == "BASE")
     {
@@ -876,6 +911,7 @@ int main()
         }
         LIT_INTERMEDIATE.clear();
     }
+    sort(INSTRUCTIONS.begin(), INSTRUCTIONS.end(), custom_sort);
     programFile.close();
     PROGRAM_LENGTH = LOCCTR - START_ADDRESS;
     if (BASE[0] == '*')
