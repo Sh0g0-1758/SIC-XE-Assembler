@@ -56,6 +56,7 @@ int main()
     program_initialisation(line, NAME, START_ADDRESS, LOCCTR);
     while (getline(programFile, line))
     {
+        handle_comments(line);
         pass1(line, NOBASE, LIT_INTERMEDIATE, LITTAB, LOCCTR, INSTRUCTIONS, SYMBOL_TABLE, SYMBOL_FLAG, START_ADDRESS, ORG, MRECORDS, OPTAB, BASE, prevLOCCTR);
     }
     if (LIT_INTERMEDIATE.size() != 0)

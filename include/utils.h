@@ -18,6 +18,15 @@ bool custom_sort(Instruction a, Instruction b)
     return a.address < b.address;
 }
 
+void handle_comments(string &line)
+{
+    size_t found = line.find('.');
+    if (found != string::npos)
+    {
+        line = line.substr(0, found);
+    }
+}
+
 pair<string, string> get_registers(const string &inputString)
 {
     istringstream iss(inputString);

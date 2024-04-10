@@ -1,7 +1,7 @@
 COPY    START   0000
         BASE    ZERO
 FIRST   STL    RETADR
-        +LDA    LENGTH
+        +LDA    LENGTH . This is a random comment
         LDA     =*
 EUPHY   EQU     *
 SHOGO   EQU     256
@@ -10,7 +10,7 @@ SHOGO   EQU     256
         JEQ     LOOP1
         J       LOOP2
 LOOP1   LDA     =X'F1'
-        STA     LENGTH
+        STA     LENGTH  . And this is another random comment
         LTORG
 LOOP2   RSUB    
 ZERO    WORD    69
