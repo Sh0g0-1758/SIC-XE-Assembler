@@ -1,6 +1,9 @@
+#ifndef DEBUG_H
+#define DEBUG_H
+
 #include <bits/stdc++.h>
-#include "def.h"
 using namespace std;
+#include "def.h"
 
 typedef long long ll;
 typedef unsigned long long ull;
@@ -223,3 +226,5 @@ void _print(deque<T> v)
    }
    cerr << "]";
 }
+
+#endif

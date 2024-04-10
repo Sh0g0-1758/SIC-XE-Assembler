@@ -1,5 +1,9 @@
+#ifndef DEF_H
+#define DEF_H
+
 #include <string>
 #include <unordered_map>
+
 
 enum Register
 {
@@ -91,3 +95,5 @@ struct formatData
 };
 
 std::string SPACE = "\n<=====================================================================>\n";
+
+#endif
