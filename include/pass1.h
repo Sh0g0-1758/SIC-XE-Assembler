@@ -65,7 +65,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
     {
         if (SYMBOL_TABLE.find(tokens[2]) == SYMBOL_TABLE.end() or SYMBOL_TABLE[tokens[2]] != START_ADDRESS)
         {
-            cerr << "Invalid program end." << endl;
+            string err_msg = "Invalid program end: " + tokens[2];
+            save_error_msg(err_msg);
             exit(0);
         }
         return;
@@ -74,7 +75,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
     {
         if (SYMBOL_TABLE.find(tokens[0]) != SYMBOL_TABLE.end())
         {
-            cerr << "Duplicate symbol found." << endl;
+            string err_msg = "Duplicate symbol: " + tokens[0];
+            save_error_msg(err_msg);
             exit(0);
         }
         if (tokens[1] == "EQU")
@@ -255,7 +257,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
             }
             else
             {
-                cerr << "Invalid ORG argument." << endl;
+                string err_msg = "Invalid ORG argument: " + tokens[2];
+                save_error_msg(err_msg);
                 exit(0);
             }
             LOCCTR = SYMBOL_TABLE[tokens[2]];
@@ -322,7 +325,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
         }
         else
         {
-            cerr << "Invalid byte declaration." << endl;
+            string err_msg = "Invalid byte declaration: " + tokens[2];
+            save_error_msg(err_msg);
             exit(0);
         }
 
@@ -333,14 +337,15 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
     {
         if (OPTAB.find(tokens[1].substr(1)) == OPTAB.end())
         {
-            cerr << "Invalid opcode." << endl;
+            string err_msg = "Invalid opcode: " + tokens[1].substr(1);
+            save_error_msg(err_msg);
             exit(0);
         }
     }
     else if (OPTAB.find(tokens[1]) == OPTAB.end())
     {
-        debug(tokens)
-        cerr << "Invalid opcode." << endl;
+        string err_msg = "Invalid opcode: " + tokens[1].substr(0, tokens[1].size() - 1);
+        save_error_msg(err_msg);
         exit(0);
     }
     if (tokens[1][0] == '+')
@@ -385,7 +390,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
             }
             else
             {
-                cerr << "Invalid literal declaration." << endl;
+                string err_msg = "Invalid literal declaration: " + tokens[2];
+                save_error_msg(err_msg);
                 exit(0);
             }
         }

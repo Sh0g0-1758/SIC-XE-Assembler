@@ -102,15 +102,15 @@ int main()
     debug(LITTAB);
     debug(SPACE);
     debug(INSTRUCTIONS);
-    debug(SPACE)
-    debug(NAME)
-    debug(SPACE)
-    debug(START_ADDRESS)
-    debug(SPACE)
-    debug(LOCCTR)
-    debug(SPACE)
-    debug(PROGRAM_LENGTH)
-    debug(SPACE)
+    debug(SPACE);
+    debug(NAME);
+    debug(SPACE);
+    debug(START_ADDRESS);
+    debug(SPACE);
+    debug(LOCCTR);
+    debug(SPACE);
+    debug(PROGRAM_LENGTH);
+    debug(SPACE);
     LOCCTR = START_ADDRESS;
     pass2(INSTRUCTIONS, OBJCODE, LOCCTR, LITTAB, SYMBOL_TABLE, NOBASE, MRECORDS);
     for (auto it : OBJCODE)

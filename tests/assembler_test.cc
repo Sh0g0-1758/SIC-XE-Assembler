@@ -36,6 +36,12 @@ TEST(Program3_Test, CompareFiles) {
     ASSERT_TRUE(compareFiles(filePath1, filePath2));
 }
 
+TEST(ErrorProgram_Test, CompareFiles) {
+    string filePath1 = "./../../Output/error_expected.txt";
+    string filePath2 = "./../../Output/error_generated.txt";
+    ASSERT_TRUE(compareFiles(filePath1, filePath2));
+}
+
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

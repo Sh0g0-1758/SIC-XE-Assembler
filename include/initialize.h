@@ -18,7 +18,8 @@ void program_initialisation(string line, string &NAME, int &START_ADDRESS, int &
     }
     if (tokens[1] != "START")
     {
-        cerr << "Invalid program start." << endl;
+        string err_msg = "Invalid program start: " + tokens[1];
+        save_error_msg(err_msg);
         exit(0);
     }
     NAME = tokens[0];
@@ -54,14 +55,16 @@ void pre_process(string line, map<string, Opcode> &OPTAB)
         }
         else
         {
-            cerr << "Invalid format value." << endl;
+            string err_msg = "Invalid format value: " + tokens[1];
+            save_error_msg(err_msg);
             exit(0);
         }
         OPTAB[tokens[0]] = opcode;
     }
     else
     {
-        cerr << "Insufficient data values for opcode." << endl;
+        string err_msg = "Insufficient data values for opcode: " + tokens.size();
+        save_error_msg(err_msg);
         exit(0);
     }
 }

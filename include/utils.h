@@ -8,6 +8,20 @@ using namespace std;
 
 using VariantType = variant<formatOne, formatTwo, formatThree, formatFour, formatData>;
 
+void save_error_msg(string str) {
+    cerr << "Assembler Encountered an Error. Diagnostics are stored in error_generated.txt\n";
+    string File_Name = "./../Output/error_generated.txt";
+    ofstream outputFile(File_Name);
+
+    if (!outputFile.is_open())
+    {
+        cerr << "Failed to open the file." << endl;
+        exit(0);
+    }
+    outputFile << str << endl;
+    outputFile.close();
+}
+
 bool is_digits(const string &str)
 {
     return all_of(str.begin(), str.end(), ::isdigit);
@@ -138,7 +152,8 @@ vector<string> getExpressionTokens(const string &expression)
     {
         if (token.find('*') != string::npos || token.find('/') != string::npos)
         {
-            cerr << "Invalid expression." << endl;
+            string err_msg = "Invalid expression: " + expression;
+            save_error_msg(err_msg);
             exit(0);
         }
         size_t pos = 0;
@@ -210,7 +225,8 @@ Register stringToRegister(const string &str)
     }
     else
     {
-        cerr << "Invalid register string" << endl;
+        string err_msg = "Invalid register string: " + str;
+        save_error_msg(err_msg);
         exit(0);
     }
 }
