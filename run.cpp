@@ -6,6 +6,7 @@ using VariantType = variant<formatOne, formatTwo, formatThree, formatFour, forma
 map<string, Opcode> OPTAB;
 vector<Instruction> INSTRUCTIONS;
 map<string, int> SYMBOL_TABLE;
+map<string, bool> SYMBOL_FLAG;
 vector<pair<string, int>> LIT_INTERMEDIATE;
 map<string, int> LITTAB;
 
@@ -90,6 +91,43 @@ int hexToInt(const string &hexString)
     int value;
     stream >> hex >> value;
     return value;
+}
+
+vector<string> getExpressionTokens(const string &expression)
+{
+    vector<string> tokens;
+    istringstream iss(expression);
+    string token;
+
+    while (iss >> token)
+    {
+        if (token.find('*') != std::string::npos || token.find('/') != std::string::npos)
+        {
+            cerr << "Invalid expression." << endl;
+            exit(0);
+        }
+        size_t pos = 0;
+        while ((pos = token.find_first_of("+-", pos)) != string::npos)
+        {
+            tokens.push_back(token.substr(0, pos));
+            tokens.push_back(token.substr(pos, 1));
+            token.erase(0, pos + 1);
+            pos = 0;
+        }
+        if (!token.empty())
+        {
+            tokens.push_back(token);
+        }
+    }
+
+    vector<string> finalTokens;
+    for (const auto &token : tokens)
+    {
+        if (token != " " and token != "")
+            finalTokens.push_back(token);
+    }
+
+    return finalTokens;
 }
 
 bool is_digits(const string &str)
@@ -434,17 +472,151 @@ void pass1(string line)
         }
         if (tokens[1] == "EQU")
         {
+            vector<string> equ_toks;
+            if (tokens[2] != "*")
+            {
+                equ_toks = getExpressionTokens(tokens[2]);
+            }
             if (tokens[2] == "*")
             {
                 SYMBOL_TABLE[tokens[0]] = LOCCTR;
             }
-            else if (SYMBOL_TABLE.find(tokens[2]) != SYMBOL_TABLE.end())
+            else if (equ_toks.size() != 1)
+            {
+                // Give Expr value here
+                if (equ_toks[0] == "+" or equ_toks[0] == "-")
+                {
+                    cout << "INVALID STARTING EQU ARGUMENT." << endl;
+                    exit(0);
+                }
+                else if (SYMBOL_TABLE.find(equ_toks[0]) == SYMBOL_TABLE.end())
+                {
+                    cout << "INVALID EQU ARGUMENT." << endl;
+                    exit(0);
+                }
+                int value = SYMBOL_TABLE[equ_toks[0]];
+                bool absolute = false;
+                for (ll i = 1; i < equ_toks.size(); i++)
+                {
+                    if (equ_toks[i] == "+")
+                    {
+                        if (!absolute)
+                        {
+                            if (SYMBOL_TABLE.find(equ_toks[i + 1]) != SYMBOL_TABLE.end() or !is_digits(equ_toks[i + 1]))
+                            {
+                                cout << "INVALID EQU ARGUMENT." << endl;
+                                exit(0);
+                            }
+                            else
+                            {
+                                value = value + stoi(equ_toks[i + 1]);
+                                absolute = false;
+                            }
+                        }
+                        else
+                        {
+                            if (SYMBOL_TABLE.find(equ_toks[i + 1]) != SYMBOL_TABLE.end())
+                            {
+                                value = value + SYMBOL_TABLE[equ_toks[i + 1]];
+                                absolute = false;
+                            }
+                            else if (is_digits(equ_toks[i + 1]))
+                            {
+                                value = value + stoi(equ_toks[i + 1]);
+                                absolute = true;
+                            }
+                            else
+                            {
+                                cout << "INVALID EQU ARGUMENT." << endl;
+                                exit(0);
+                            }
+                        }
+                    }
+                    else if (equ_toks[i] == "-")
+                    {
+                        if (absolute)
+                        {
+                            if (SYMBOL_TABLE.find(equ_toks[i + 1]) != SYMBOL_TABLE.end())
+                            {
+                                cout << "INVALID EQU ARGUMENT." << endl;
+                                exit(0);
+                            }
+                            else if (is_digits(equ_toks[i + 1]))
+                            {
+                                value = value - stoi(equ_toks[i + 1]);
+                            }
+                            else
+                            {
+                                cout << "INVALID EQU ARGUMENT." << endl;
+                                exit(0);
+                            }
+                        }
+                        else
+                        {
+                            if (SYMBOL_TABLE.find(equ_toks[i + 1]) != SYMBOL_TABLE.end())
+                            {
+                                value = value - SYMBOL_TABLE[equ_toks[i + 1]];
+                                absolute = false;
+                            }
+                            else if (is_digits(equ_toks[i + 1]))
+                            {
+                                value = value - stoi(equ_toks[i + 1]);
+                                absolute = false;
+                            }
+                            else
+                            {
+                                cout << "INVALID EQU ARGUMENT." << endl;
+                                exit(0);
+                            }
+                        }
+                    }
+                    i++;
+                }
+                SYMBOL_TABLE[tokens[0]] = value;
+                if (absolute)
+                {
+                    SYMBOL_FLAG[tokens[0]] = false;
+                }
+                else
+                {
+                    // Generate Modification Record
+                    string addr = intToHex(LOCCTR);
+                    while (addr.size() != 6)
+                    {
+                        addr = '0' + addr;
+                    }
+                    string val_str = intToHex(intToHex(SYMBOL_TABLE[tokens[0]]).size());
+                    if (val_str.size() == 1)
+                    {
+                        val_str = '0' + val_str;
+                    }
+                    MRECORDS.push_back("M" + addr + val_str);
+                }
+            }
+            else if (equ_toks.size() == 1 and SYMBOL_TABLE.find(tokens[2]) != SYMBOL_TABLE.end())
             {
                 SYMBOL_TABLE[tokens[0]] = SYMBOL_TABLE[tokens[2]];
+                SYMBOL_FLAG[tokens[0]] = true;
+                if (SYMBOL_FLAG[tokens[2]])
+                {
+                    // Generate Modification Record
+                    string addr = intToHex(LOCCTR);
+                    while (addr.size() != 6)
+                    {
+                        addr = '0' + addr;
+                    }
+                    string val_str = intToHex(intToHex(SYMBOL_TABLE[tokens[0]]).size());
+                    if (val_str.size() == 1)
+                    {
+                        val_str = '0' + val_str;
+                    }
+                    MRECORDS.push_back("M" + addr + val_str);
+                }
             }
             else if (is_digits(tokens[2]))
             {
                 SYMBOL_TABLE[tokens[0]] = stoi(tokens[2]);
+                SYMBOL_FLAG[tokens[0]] = false;
             }
             else
             {
@@ -460,8 +632,9 @@ void pass1(string line)
             LOCCTR += (instruction.data.size() - 3) / 2;
             INSTRUCTIONS.push_back(instruction);
             return;
-        }
+        } // early return, hence no else
         SYMBOL_TABLE[tokens[0]] = LOCCTR;
+        SYMBOL_FLAG[tokens[0]] = true;
     }
     if (tokens[1] == "ORG")
     {
