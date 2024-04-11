@@ -30,7 +30,7 @@
 
 - [x] Program Blocks
 
-## HOW TO RUN
+# HOW TO RUN
 
 To run the assembler, simply run ``` ./Run.sh ``` from your terminal after cloning the repository. The assembler will ask for the path to your file. If the program is not erroneous, it will generate the corresponding ``` HEADER RECORD ``` in the Output directory. 
 
@@ -82,7 +82,7 @@ EQU     BUFEND-BUFFER
 
 Notice the spacing between the statements after the Opcode MNEMONIC. 
 
-## DESIGN
+# DESIGN
 
 To Explain the design of the assembler, I will take the following code as reference : 
 
@@ -213,4 +213,21 @@ That concludes pass1 after which the SYMBOL_TABLE and LITERAL_TABLE are updated 
 - Format Four was made in a similar manner like Format three execpt that there were fewer checks. One tricky part was implementation of the Modification record. As I had already determined whether the generated symbol was absolute or relative, I simply used the ``` SYMBOL_FLAG ``` table to get the corresponding flag and generate the MODIFICATION record accordingly. 
 - Finally for generating the opcode for data type instruction, I check for WORDS and simply convert the string to int. For Byte further checks for recognising X and C characters in the string are placed. The Location Counter is then incremented correspondingly. For the RESB and RESW type instructions, I have pushed a ``` SKIP ``` instruction in my objcode to help the assembler RECORD generating function recognise the specific number of bytes are to be skipped. 
 
-That concludes the pass2 and leaves only the HEADER record generation part of the assembler. 
+That concludes the pass2 and leaves only the HEADER record generation part of the assembler: 
+
+- This was again a little tricky and I divided it into two parts, one for generating the actual objcode from the objcode struct that I generated in my pass2 and the other for actually generating the string that will be rendered as the HEADER RECORD. 
+- I have used a ``` vector of variant ``` to store the objcode of differnet Formats. 
+- The main part here was to take care of the size of every part of the record and generating the Hex Form from the corresponding int form. 
+- One particular thing to take care of was the negative displacement for which only the last 3 characters had to be taken. 
+- While the GETRECORDS function mainly involved taking care of breaking the record after it reaches a size of 0x1E and generating a new record when a SKIP statment it hit. 
+- After the record is generated, it is saved in the Output file with the name ``` {PROG_NAME}_generated.txt ```
+
+That concludes the design of the Assembler. 
+
+# CONTRIBUTING GUIDELINES
+
+PRs are welcome. Don't forget to follow the format specified in the How to run section. 
+
+# Contributor
+
+Made with ❤️ By : <a href="https://twitter.com/ShogLoFi">shogo</a>

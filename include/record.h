@@ -111,12 +111,7 @@ string GETRECORDS(int &START_ADDRESS, string &NAME,
                cnt + ((RECORDS[i].first.size()) / 2) <= max_text_len) {
             cnt += ((RECORDS[i].first.size()) / 2);
             record += RECORDS[i].first;
-            // if(cnt + ((RECORDS[i].first.size()) / 2) <= max_text_len)
-            // {
             i++;
-            // } else {
-            //     break;
-            // }
         }
         if (i < RECORDS.size()) {
             if (RECORDS[i].first != "SKIP") {
@@ -139,7 +134,6 @@ string GETRECORDS(int &START_ADDRESS, string &NAME,
         if (i < RECORDS.size()) {
             while (RECORDS[i].first == "SKIP" and i < RECORDS.size()) {
                 i++;
-                // LOCCTR += stoi(RECORDS[i].first);
                 if (i + 1 < RECORDS.size()) {
                     if (RECORDS[i + 1].first == "SKIP") {
                         i++;
