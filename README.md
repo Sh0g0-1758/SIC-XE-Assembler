@@ -4,29 +4,29 @@
 
 #### The implementation currently supports: 
 
-<input type="checkbox" disabled checked /> Format 1 instructions
+- [x] Format 1 instructions
 
-<input type="checkbox" disabled checked /> Format 2 instructions
+- [x] Format 2 instructions
 
-<input type="checkbox" disabled checked /> Format 3 instructions
+- [x] Format 3 instructions
 
-<input type="checkbox" disabled checked /> Format 4 instructions
+- [x] Format 4 instructions
 
-<input type="checkbox" disabled checked /> Base Directive
+- [x] Base Directive
 
-<input type="checkbox" disabled checked /> Program Relocation
+- [x] Program Relocation
 
-<input type="checkbox" disabled checked /> Literals
+- [x] Literals
 
-<input type="checkbox" disabled checked /> LTORG directive
+- [x] LTORG directive
 
-<input type="checkbox" disabled checked /> EQU directive
+- [x] EQU directive
 
-<input type="checkbox" disabled checked /> ORG directive
+- [x] ORG directive
 
-<input type="checkbox" disabled checked /> Expressions
+- [x] Expressions
 
-<input type="checkbox" disabled checked /> Program Blocks
+- [x] Program Blocks
 
 ## HOW TO RUN
 
