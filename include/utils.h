@@ -5,18 +5,26 @@
 using namespace std;
 #include "def.h"
 #include "debug.h"
+#include "../tools/color/color.h"
+
+// colored output
+const Color::Modifier red(Color::FG_RED);
+const Color::Modifier def(Color::FG_DEFAULT);
+const Color::Modifier green(Color::FG_GREEN);
+const Color::Modifier blue(Color::FG_BLUE);
+const Color::Modifier cyan(Color::FG_CYAN);
 
 using VariantType = variant<formatOne, formatTwo, formatThree, formatFour, formatData>;
 
 void save_error_msg(string str)
 {
-    cerr << "Assembler Encountered an Error. Diagnostics are stored in error_generated.txt\n";
+    cout << red << "Assembler Encountered an Error. Diagnostics are stored in" << def << blue << " error_generated.txt\n" << def;
     string File_Name = "./../Output/error_generated.txt";
     ofstream outputFile(File_Name);
 
     if (!outputFile.is_open())
     {
-        cerr << "Failed to open the file." << endl;
+        cout << red << "Failed to open the file." << def << endl;
         exit(0);
     }
     outputFile << str << endl;
@@ -145,7 +153,7 @@ string get_file_name(string filePath)
     size_t lastSlashPos = filePath.find_last_of('/');
     if (lastSlashPos == string::npos)
     {
-        cerr << "Invalid file path." << endl;
+        cout << red << "Invalid file path." << def << endl;
         exit(0);
     }
     string extractedString = filePath.substr(lastSlashPos + 1, filePath.find(".txt") - lastSlashPos - 1);

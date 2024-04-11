@@ -44,10 +44,10 @@ string BASE;
 int main()
 {
     // Processing the opcodes
-    ifstream opcodeFile("../data/opcode.info");
+    ifstream opcodeFile("../tools/data/opcode.info");
     if (!opcodeFile.is_open())
     {
-        cerr << "Failed to open the file." << endl;
+        cout << red << "Failed to open the file." << def << endl;
         exit(0);
     }
     string line;
@@ -60,12 +60,12 @@ int main()
 
     // First pass of the assembler
     string File_Name;
-    cout << "Enter the file path> ";
+    cout << cyan << "Enter the file path> " << def;
     cin >> File_Name;
     ifstream programFile(File_Name);
     if (!programFile.is_open())
     {
-        cerr << "Failed to open the file." << endl;
+        cout << red << "Failed to open the file." << def << endl;
         exit(0);
     }
     getline(programFile, line); // Starting address and program name
@@ -158,12 +158,12 @@ int main()
 
     if (!outputFile.is_open())
     {
-        cerr << "Failed to open the file." << endl;
+        cout << red << "Failed to open the file." << def << endl;
         return 1;
     }
     outputFile << ASSEMBLER_RECORD << endl;
     outputFile.close();
 
-    cout << "The HEADER Record has been successfully generated." << endl;
+    cout << green << "The HEADER Record has been successfully generated." << def << endl;
     exit(0);
 }
