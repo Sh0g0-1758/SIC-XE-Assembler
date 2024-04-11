@@ -51,20 +51,20 @@ To ensure that your changes pass the CI/CD pipeline for Formatting, run ``` ./fo
 
 In case you get the following error : 
 
-```sh
+```rs
 Invalid opcode: {Your_Opcode}
 ```
 
 It simply means that the Opcode is not included in the opcode.info file. To add it, simply follow the below format : 
 
-```sh
+```rs
 MNEMONIC |  FORMAT   | OPCODE 
 {Name}   | {1,2,3/4} | {Code}
 ```
 
 To ensure the correct execution of the assembler, Please write statements like 
 
-```sh
+```rs
 ADDR    X , A
 ADD     TABLE2, X
 EQU     BUFEND - BUFFER
@@ -72,7 +72,7 @@ EQU     BUFEND - BUFFER
 
 as 
 
-```sh
+```rs
 ADDR    X,A
 ADD     TABLE2,X
 EQU     BUFEND-BUFFER
@@ -84,7 +84,7 @@ Notice the spacing between the statements after the Opcode MNEMONIC.
 
 To Explain the design of the assembler, I will take the following code as reference : 
 
-```sh
+```rs
 COPY    START   0
 FIRST   STL     RETADR
 CLOOP   JSUB    RDREC
