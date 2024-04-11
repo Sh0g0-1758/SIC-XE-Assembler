@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.0)
-project(SIC-XE-Assembler)
+cmake_minimum_required(VERSION 3.0) project(SIC - XE - Assembler)
 
-include_directories(include)
+    include_directories(include)
 
-file(GLOB SOURCES "src/assembler.cpp")
+        file(GLOB SOURCES "src/assembler.cpp")
 
-add_executable(assembler ${SOURCES})
+            add_executable(assembler ${SOURCES})
 
-add_subdirectory(tests)
+                add_subdirectory(tests)
