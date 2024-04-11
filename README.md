@@ -203,3 +203,14 @@ Multiple things happen in the ``` pass1 ``` of the assembler:
 
 - Then it identifies the format of the instruction and look for literals in the program. This involved a tricky part where I had to ensure that multiple literals denoting the same value be assigned the same address for the generated literal for which i made a utility function. 
 - Finally, Update the Location Counter according to the number of bytes that the instruction occupies and process the next instruction. 
+
+That concludes pass1 after which the SYMBOL_TABLE and LITERAL_TABLE are updated according to the program blocks in which they were present. Then the PROGRAM_LENGTH is calculated, BASE address is taken account of and the required data is sent to pass2 : 
+
+- The major task in pass2 was taking account of new blocks and ensuring that a new text record was generated every time it is encountered. I did this by tricking the program into Reserving 0 bytes when a USE statement was encountered. This ensured the correctness of the program and realized the desired behaviour of making a new text record every time. 
+- Afterwards, I used the ``` format{X} ``` struct defined in ``` def.h ``` to create object codes for every instruction. this uses a lot of utility functions which are defined in the ``` utils.h ``` file.
+- In format three corresponding checks are put in place to take account of immediate addressing, simple addressing etc. Further a check for indexed addressing is also put. These are done by simply checking the presence of characters like '#,@,X' in the program. 
+- Then it checks for the presence of SYMBOLS and tries to find them in the SYMBOL/LITERAL table. The order followed here is PC --> BASE. Corresponding range checks are also placed. 
+- Format Four was made in a similar manner like Format three execpt that there were fewer checks. One tricky part was implementation of the Modification record. As I had already determined whether the generated symbol was absolute or relative, I simply used the ``` SYMBOL_FLAG ``` table to get the corresponding flag and generate the MODIFICATION record accordingly. 
+- Finally for generating the opcode for data type instruction, I check for WORDS and simply convert the string to int. For Byte further checks for recognising X and C characters in the string are placed. The Location Counter is then incremented correspondingly. For the RESB and RESW type instructions, I have pushed a ``` SKIP ``` instruction in my objcode to help the assembler RECORD generating function recognise the specific number of bytes are to be skipped. 
+
+That concludes the pass2 and leaves only the HEADER record generation part of the assembler. 
