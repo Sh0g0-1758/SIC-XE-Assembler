@@ -8,7 +8,8 @@ using namespace std;
 
 using VariantType = variant<formatOne, formatTwo, formatThree, formatFour, formatData>;
 
-void save_error_msg(string str) {
+void save_error_msg(string str)
+{
     cerr << "Assembler Encountered an Error. Diagnostics are stored in error_generated.txt\n";
     string File_Name = "./../Output/error_generated.txt";
     ofstream outputFile(File_Name);
@@ -132,9 +133,11 @@ void removeNewlines(string &str)
     }
 }
 
-string get_file_name(string filePath) {
+string get_file_name(string filePath)
+{
     size_t lastSlashPos = filePath.find_last_of('/');
-    if (lastSlashPos == string::npos) {
+    if (lastSlashPos == string::npos)
+    {
         cerr << "Invalid file path." << endl;
         exit(0);
     }
@@ -218,6 +221,11 @@ unordered_map<string, Register> registerMap = {
 Register stringToRegister(const string &str)
 {
     // helper function to convert the string to register
+    if (str.empty())
+    {
+        auto it = registerMap.find("A");
+        return it->second;
+    }
     auto it = registerMap.find(str);
     if (it != registerMap.end())
     {

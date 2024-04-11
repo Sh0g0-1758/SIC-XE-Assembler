@@ -7,11 +7,23 @@ using namespace std;
 #include "def.h"
 #include "debug.h"
 
-void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int &LOCCTR, map<string, int> &LITTAB, map<string, int> &SYMBOL_TABLE, bool &NOBASE, vector<string> &MRECORDS)
+void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int &LOCCTR, map<string, int> &LITTAB, map<string, int> &SYMBOL_TABLE, bool &NOBASE, vector<string> &MRECORDS, int &BLOCK_NUMBER, map<int, int> &BLOCK_LOCCTR)
 {
     for (auto it : INSTRUCTIONS)
     {
-        if (it.format == Format::ONE)
+        // Identify the presence of a new block
+        if (it.new_block)
+        {
+            BLOCK_LOCCTR[BLOCK_NUMBER] = LOCCTR;
+            LOCCTR = BLOCK_LOCCTR[it.block];
+            // To ensure that a new Text Record is created each time a new block is encountered
+            formatData obj;
+            obj.value = 0;
+            obj.reserved = true;
+            obj.word = false;
+            OBJCODE.push_back(obj);
+        }
+        else if (it.format == Format::ONE)
         {
             LOCCTR += 1;
             formatOne obj;
@@ -89,10 +101,6 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
             }
             else if (SYMBOL_TABLE.find(it.data) != SYMBOL_TABLE.end())
             {
-                debug(it.data);
-                debug(SYMBOL_TABLE[it.data]);
-                debug(LOCCTR);
-                debug(SYMBOL_TABLE["BASE"]);
                 if (SYMBOL_TABLE[it.data] - LOCCTR < 2047 and SYMBOL_TABLE[it.data] - LOCCTR >= -2048)
                 {
                     obj.p = true;
@@ -101,8 +109,6 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
                 }
                 else if (SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"] < 4095 and SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"] >= 0 and !NOBASE)
                 {
-                    debug(it.data);
-                    cout << "BASE" << endl;
                     obj.p = false;
                     obj.b = true;
                     obj.displacement = SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"];
@@ -127,7 +133,8 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
             }
             else
             {
-                cout << "Displacement can't be reached from PC or BASE." << endl;
+                string err_msg = "Displacement can't be reached from PC or BASE.";
+                save_error_msg(err_msg);
                 exit(0);
             }
             OBJCODE.push_back(obj);
@@ -194,7 +201,8 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
             }
             else
             {
-                cout << "Invalid Symbol or Address out of range." << endl;
+                string err_msg = "Invalid Symbol or Address out of range.";
+                save_error_msg(err_msg);
                 exit(0);
             }
             OBJCODE.push_back(obj);

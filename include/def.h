@@ -47,6 +47,8 @@ struct Instruction
     Format format;
     DataType type;
     int address;
+    int block;
+    bool new_block;
 };
 
 struct formatOne

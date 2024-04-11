@@ -16,7 +16,7 @@ using namespace std;
         instruction.opcode.format = Format::DATA; \
     }
 
-void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIATE, map<string, int> &LITTAB, int &LOCCTR, vector<Instruction> &INSTRUCTIONS, map<string, int> &SYMBOL_TABLE, map<string, bool> &SYMBOL_FLAG, int &START_ADDRESS, bool &ORG, vector<string> &MRECORDS, map<string, Opcode> &OPTAB, string &BASE, int &prevLOCCTR)
+void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIATE, map<string, int> &LITTAB, int &LOCCTR, vector<Instruction> &INSTRUCTIONS, map<string, int> &SYMBOL_TABLE, map<string, bool> &SYMBOL_FLAG, int &START_ADDRESS, bool &ORG, vector<string> &MRECORDS, map<string, Opcode> &OPTAB, string &BASE, int &prevLOCCTR, map<string, pair<int, int>> &BLOCK_TABLE, int &BLOCK_NUMBER, string &CURR_BLOCK_NAME, int &TOTAL_BLOCKS, map<int, string> &BLOCK_NAMES, map<string, int> &SYMBOL_BLOCK, map<string, int> &LIT_BLOCK)
 {
     Instruction instruction;
     vector<string> tokens;
@@ -25,6 +25,35 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
     while (iss >> token)
     {
         tokens.push_back(trim(token));
+    }
+    if (tokens[0] == "USE")
+    {
+        BLOCK_TABLE[CURR_BLOCK_NAME].second = LOCCTR;
+        if (tokens.size() == 1)
+        {
+            BLOCK_NUMBER = 0;
+            CURR_BLOCK_NAME = "DEFAULT";
+        }
+        else
+        {
+            if (BLOCK_TABLE.find(tokens[1]) != BLOCK_TABLE.end())
+            {
+                BLOCK_NUMBER = BLOCK_TABLE[tokens[1]].first;
+            }
+            else
+            {
+                TOTAL_BLOCKS++;
+                BLOCK_TABLE[tokens[1]] = {TOTAL_BLOCKS, 0};
+                BLOCK_NUMBER = TOTAL_BLOCKS;
+                BLOCK_NAMES[BLOCK_NUMBER] = tokens[1];
+            }
+            CURR_BLOCK_NAME = tokens[1];
+        }
+        LOCCTR = BLOCK_TABLE[CURR_BLOCK_NAME].second;
+        instruction.new_block = true;
+        instruction.block = BLOCK_NUMBER;
+        INSTRUCTIONS.push_back(instruction);
+        return;
     }
     if (tokens[0] == "NOBASE")
     {
@@ -36,6 +65,7 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
         for (auto it : LIT_INTERMEDIATE)
         {
             LITTAB[it.first] = LOCCTR;
+            LIT_BLOCK[it.first] = BLOCK_NUMBER;
             instruction.address = LOCCTR;
             instruction.data = it.first;
             instruction.format = Format::DATA;
@@ -89,18 +119,21 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
             if (tokens[2] == "*")
             {
                 SYMBOL_TABLE[tokens[0]] = LOCCTR;
+                SYMBOL_BLOCK[tokens[0]] = BLOCK_NUMBER;
             }
             else if (equ_toks.size() != 1)
             {
                 // Give Expr value here
                 if (equ_toks[0] == "+" or equ_toks[0] == "-")
                 {
-                    cout << "INVALID STARTING EQU ARGUMENT." << endl;
+                    string err_msg = "INVALID STARTING EQU ARGUMENT.";
+                    save_error_msg(err_msg);
                     exit(0);
                 }
                 else if (SYMBOL_TABLE.find(equ_toks[0]) == SYMBOL_TABLE.end())
                 {
-                    cout << "INVALID EQU ARGUMENT." << endl;
+                    string err_msg = "INVALID EQU ARGUMENT.";
+                    save_error_msg(err_msg);
                     exit(0);
                 }
                 int value = SYMBOL_TABLE[equ_toks[0]];
@@ -113,7 +146,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
                         {
                             if (SYMBOL_TABLE.find(equ_toks[i + 1]) != SYMBOL_TABLE.end() or !is_digits(equ_toks[i + 1]))
                             {
-                                cout << "INVALID EQU ARGUMENT." << endl;
+                                string err_msg = "INVALID EQU ARGUMENT.";
+                                save_error_msg(err_msg);
                                 exit(0);
                             }
                             else
@@ -136,7 +170,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
                             }
                             else
                             {
-                                cout << "INVALID EQU ARGUMENT." << endl;
+                                string err_msg = "INVALID EQU ARGUMENT.";
+                                save_error_msg(err_msg);
                                 exit(0);
                             }
                         }
@@ -147,7 +182,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
                         {
                             if (SYMBOL_TABLE.find(equ_toks[i + 1]) != SYMBOL_TABLE.end())
                             {
-                                cout << "INVALID EQU ARGUMENT." << endl;
+                                string err_msg = "INVALID EQU ARGUMENT.";
+                                save_error_msg(err_msg);
                                 exit(0);
                             }
                             else if (is_digits(equ_toks[i + 1]))
@@ -156,7 +192,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
                             }
                             else
                             {
-                                cout << "INVALID EQU ARGUMENT." << endl;
+                                string err_msg = "INVALID EQU ARGUMENT.";
+                                save_error_msg(err_msg);
                                 exit(0);
                             }
                         }
@@ -174,7 +211,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
                             }
                             else
                             {
-                                cout << "INVALID EQU ARGUMENT." << endl;
+                                string err_msg = "INVALID EQU ARGUMENT.";
+                                save_error_msg(err_msg);
                                 exit(0);
                             }
                         }
@@ -182,6 +220,7 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
                     i++;
                 }
                 SYMBOL_TABLE[tokens[0]] = value;
+                SYMBOL_BLOCK[tokens[0]] = BLOCK_NUMBER;
                 if (absolute)
                 {
                     SYMBOL_FLAG[tokens[0]] = false;
@@ -205,6 +244,7 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
             else if (equ_toks.size() == 1 and SYMBOL_TABLE.find(tokens[2]) != SYMBOL_TABLE.end())
             {
                 SYMBOL_TABLE[tokens[0]] = SYMBOL_TABLE[tokens[2]];
+                SYMBOL_BLOCK[tokens[0]] = BLOCK_NUMBER;
                 SYMBOL_FLAG[tokens[0]] = true;
                 if (SYMBOL_FLAG[tokens[2]])
                 {
@@ -225,11 +265,13 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
             else if (is_digits(tokens[2]))
             {
                 SYMBOL_TABLE[tokens[0]] = stoi(tokens[2]);
+                SYMBOL_BLOCK[tokens[0]] = BLOCK_NUMBER;
                 SYMBOL_FLAG[tokens[0]] = false;
             }
             else
             {
-                cout << "INVALID EQU ARGUMENT." << endl;
+                string err_msg = "INVALID EQU ARGUMENT.";
+                save_error_msg(err_msg);
                 exit(0);
             }
             instruction.address = LOCCTR;
@@ -243,6 +285,7 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
             return;
         } // early return, hence no else
         SYMBOL_TABLE[tokens[0]] = LOCCTR;
+        SYMBOL_BLOCK[tokens[0]] = BLOCK_NUMBER;
         SYMBOL_FLAG[tokens[0]] = true;
     }
     if (tokens[1] == "ORG")
@@ -344,7 +387,7 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
     }
     else if (OPTAB.find(tokens[1]) == OPTAB.end())
     {
-        string err_msg = "Invalid opcode: " + tokens[1].substr(0, tokens[1].size() - 1);
+        string err_msg = "Invalid opcode: " + tokens[1];
         save_error_msg(err_msg);
         exit(0);
     }
@@ -416,6 +459,8 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
     {
         LOCCTR += 4;
     }
+    instruction.block = BLOCK_NUMBER;
+    instruction.new_block = false;
     INSTRUCTIONS.push_back(instruction);
 }
 

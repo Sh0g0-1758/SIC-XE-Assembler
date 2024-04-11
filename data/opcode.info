@@ -14,3 +14,14 @@ LDX      | 3/4    | 04
 TIX      | 3/4    | 2C
 JLT      | 3/4    | 38
 LDB      | 3/4    | 68
+JSUB     | 3/4    | 48
+CLEAR    | 2      | B4
+LDT      | 3/4    | 74
+TD       | 3/4    | E0
+STCH     | 3/4    | 54
+TIXR     | 2      | B8
+STX      | 3/4    | 10
+LDCH     | 3/4    | 50
+WD       | 3/4    | DC
+RD       | 3/4    | D8
+COMPR    | 2      | A0

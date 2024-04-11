@@ -46,6 +46,8 @@ void _print(Instruction t)
    _print(t.format);
    cerr << " address> ";
    _print(t.address);
+   cerr << " block> ";
+   _print(t.block);
    cerr << " type> ";
    _print(t.type);
    cerr << "}";

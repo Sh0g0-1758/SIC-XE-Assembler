@@ -41,8 +41,7 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
         }
         string tmp2 = intToHex((tmp.x ? 8 : 0) + (tmp.b ? 4 : 0) + (tmp.p ? 2 : 0) +
                                (tmp.e ? 1 : 0));
-        debug(tmp.displacement)
-            string tmp3 = intToHex(tmp.displacement);
+        string tmp3 = intToHex(tmp.displacement);
         tmp3 = getLastThreeCharacters(tmp3);
         while (tmp3.size() != 3)
         {
@@ -114,7 +113,6 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
 
 string GETRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> &RECORDS, int &PROGRAM_LENGTH, vector<string> &MRECORDS)
 {
-    debug(RECORDS)
     string RECORD = "";
     LOCCTR = START_ADDRESS;
     RECORD += "H";
@@ -164,13 +162,19 @@ string GETRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> 
         RECORD += record;
         LOCCTR += cnt;
         RECORD += "\n";
-        while (RECORDS[i] == "SKIP" and i < RECORDS.size())
+        if (i < RECORDS.size())
         {
-            i++;
-            LOCCTR += stoi(RECORDS[i]);
-            if(i + 1 < RECORDS.size() and RECORDS[i + 1] == "SKIP")
+            while (RECORDS[i] == "SKIP" and i < RECORDS.size())
             {
                 i++;
+                LOCCTR += stoi(RECORDS[i]);
+                if (i + 1 < RECORDS.size())
+                {
+                    if (RECORDS[i + 1] == "SKIP")
+                    {
+                        i++;
+                    }
+                }
             }
         }
     }
