@@ -1,8 +1,8 @@
-#include <gtest/gtest.h>
 #include <bits/stdc++.h>
+#include <gtest/gtest.h>
 using namespace std;
 
-bool compareFiles(const string& filePath1, const string& filePath2) {
+bool compareFiles(const string &filePath1, const string &filePath2) {
     ifstream file1(filePath1);
     ifstream file2(filePath2);
     if (!file1.is_open() || !file2.is_open()) {
@@ -48,7 +48,7 @@ TEST(ErrorProgram_Test, CompareFiles) {
     ASSERT_TRUE(compareFiles(filePath1, filePath2));
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

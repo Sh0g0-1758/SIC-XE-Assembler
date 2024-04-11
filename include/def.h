@@ -4,21 +4,9 @@
 #include <string>
 #include <unordered_map>
 
-enum Register
-{
-    A,
-    X,
-    L,
-    B,
-    S,
-    T,
-    F,
-    PC,
-    SW
-};
+enum Register { A, X, L, B, S, T, F, PC, SW };
 
-enum Format
-{
+enum Format {
     ONE,
     TWO,
     THREE,
@@ -26,22 +14,19 @@ enum Format
     DATA,
 };
 
-enum DataType
-{
+enum DataType {
     WORD,
     BYTE,
     RESB,
     RESW,
 };
 
-struct Opcode
-{
+struct Opcode {
     int code;
     Format format;
 };
 
-struct Instruction
-{
+struct Instruction {
     Opcode opcode;
     std::string data;
     Format format;
@@ -51,22 +36,19 @@ struct Instruction
     bool new_block;
 };
 
-struct formatOne
-{
+struct formatOne {
     int opcode;
     int LOCCTR;
 };
 
-struct formatTwo
-{
+struct formatTwo {
     int opcode;
     Register r1;
     Register r2;
     int LOCCTR;
 };
 
-struct formatThree
-{
+struct formatThree {
     int opcode;
     bool n;
     bool i;
@@ -78,8 +60,7 @@ struct formatThree
     int LOCCTR;
 };
 
-struct formatFour
-{
+struct formatFour {
     int opcode;
     bool n;
     bool i;
@@ -91,8 +72,7 @@ struct formatFour
     int LOCCTR;
 };
 
-struct formatData
-{
+struct formatData {
     int value;
     bool reserved;
     bool word;
@@ -100,6 +80,7 @@ struct formatData
     int LOCCTR;
 };
 
-std::string SPACE = "\n<=====================================================================>\n";
+std::string SPACE = "\n<======================================================="
+                    "==============>\n";
 
 #endif
