@@ -3,3 +3,4 @@ a.out
 help.cpp
 .editorconfig
 build
+*_generated.txt

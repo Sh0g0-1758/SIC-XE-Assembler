@@ -168,14 +168,11 @@ int main()
     {
         printVariant(it);
     }
-    cout << "DONE" << endl;
     for (auto it : OBJCODE)
     {
         generateRECORDS(it, RECORDS);
     }
-    cout << "WORKING" << endl;
     string ASSEMBLER_RECORD = GETRECORDS(LOCCTR, START_ADDRESS, NAME, RECORDS, PROGRAM_LENGTH, MRECORDS);
-    cout << "NOT WORKING" << endl;
     removeNewlines(ASSEMBLER_RECORD);
     File_Name = "./../Output/" + get_file_name(File_Name) + "_generated.txt";
     ofstream outputFile(File_Name);
