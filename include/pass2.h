@@ -7,7 +7,7 @@ using namespace std;
 #include "def.h"
 #include "debug.h"
 
-void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int &LOCCTR, map<string, int> &LITTAB, map<string, int> &SYMBOL_TABLE, bool &NOBASE, vector<string> &MRECORDS, int &BLOCK_NUMBER, map<int, int> &BLOCK_LOCCTR)
+void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int &LOCCTR, map<string, int> &LITTAB, map<string, int> &SYMBOL_TABLE, bool &NOBASE, vector<string> &MRECORDS, int &BLOCK_NUMBER, map<int, int> &BLOCK_LOCCTR, map<string, bool> &SYMBOL_FLAG)
 {
     for (auto it : INSTRUCTIONS)
     {
@@ -16,25 +16,29 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
         {
             BLOCK_LOCCTR[BLOCK_NUMBER] = LOCCTR;
             LOCCTR = BLOCK_LOCCTR[it.block];
+            BLOCK_NUMBER = it.block;
             // To ensure that a new Text Record is created each time a new block is encountered
             formatData obj;
             obj.value = 0;
             obj.reserved = true;
             obj.word = false;
+            obj.LOCCTR = LOCCTR;
             OBJCODE.push_back(obj);
         }
         else if (it.format == Format::ONE)
         {
-            LOCCTR += 1;
             formatOne obj;
+            obj.LOCCTR = LOCCTR;
+            LOCCTR += 1;
             obj.opcode = it.opcode.code;
             OBJCODE.push_back(obj);
         }
         else if (it.format == Format::TWO)
         {
+            formatTwo obj;
+            obj.LOCCTR = LOCCTR;
             LOCCTR += 2;
             auto REG = get_registers(it.data);
-            formatTwo obj;
             obj.opcode = it.opcode.code;
             obj.r1 = stringToRegister(REG.first);
             obj.r2 = stringToRegister(REG.second);
@@ -42,8 +46,9 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
         }
         else if (it.format == Format::THREE)
         {
-            LOCCTR += 3;
             formatThree obj;
+            obj.LOCCTR = LOCCTR;
+            LOCCTR += 3;
             if (it.opcode.code == 0x4C)
             {
                 obj.n = true;
@@ -147,9 +152,9 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
                 addr = '0' + addr;
             }
             addr = 'M' + addr + "05";
-            MRECORDS.push_back(addr);
-            LOCCTR += 4;
             formatFour obj;
+            obj.LOCCTR = LOCCTR;
+            LOCCTR += 4;
             obj.opcode = it.opcode.code;
             obj.e = true;
             if (it.data[0] == '#')
@@ -185,6 +190,10 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
             {
                 if (SYMBOL_TABLE.find(it.data) != SYMBOL_TABLE.end())
                 {
+                    if (SYMBOL_FLAG[it.data])
+                    {
+                        MRECORDS.push_back(addr);
+                    }
                     obj.address = SYMBOL_TABLE[it.data];
                 }
                 else
@@ -198,6 +207,7 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
                 {
                     obj.address = SYMBOL_TABLE[it.data];
                 }
+                MRECORDS.push_back(addr);
             }
             else
             {
@@ -211,8 +221,9 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
         {
             if (it.type == DataType::WORD)
             {
-                LOCCTR += 3;
                 formatData obj;
+                obj.LOCCTR = LOCCTR;
+                LOCCTR += 3;
                 obj.value = stoi(it.data);
                 obj.reserved = false;
                 obj.word = true;
@@ -221,6 +232,7 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
             else if (it.type == DataType::BYTE)
             {
                 formatData obj;
+                obj.LOCCTR = LOCCTR;
                 if (it.data[0] == 'X')
                 {
                     LOCCTR += ((it.data.length() - 3) / 2);
@@ -242,8 +254,9 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
             }
             else if (it.type == DataType::RESW)
             {
-                LOCCTR += 3 * stoi(it.data);
                 formatData obj;
+                obj.LOCCTR = LOCCTR;
+                LOCCTR += 3 * stoi(it.data);
                 obj.value = 3 * stoi(it.data);
                 obj.reserved = true;
                 obj.word = true;
@@ -251,8 +264,9 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE, int 
             }
             else if (it.type == DataType::RESB)
             {
-                LOCCTR += stoi(it.data);
                 formatData obj;
+                obj.LOCCTR = LOCCTR;
+                LOCCTR += stoi(it.data);
                 obj.value = stoi(it.data);
                 obj.reserved = true;
                 obj.word = false;

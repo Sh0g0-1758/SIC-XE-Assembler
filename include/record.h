@@ -7,9 +7,7 @@ using namespace std;
 #include "def.h"
 #include "debug.h"
 
-using VariantType = variant<formatOne, formatTwo, formatThree, formatFour, formatData>;
-
-void generateRECORDS(VariantType &v, vector<string> &RECORDS)
+void generateRECORDS(VariantType &v, vector<pair<string, int>> &RECORDS)
 {
     if (holds_alternative<formatOne>(v))
     {
@@ -18,7 +16,7 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
         {
             obj = '0' + obj;
         }
-        RECORDS.push_back(obj);
+        RECORDS.push_back({obj, get<formatOne>(v).LOCCTR});
     }
     else if (holds_alternative<formatTwo>(v))
     {
@@ -29,7 +27,7 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
             tmp1 = '0' + tmp1;
         }
         string obj = tmp1 + intToHex(tmp.r1) + intToHex(tmp.r2);
-        RECORDS.push_back(obj);
+        RECORDS.push_back({obj, tmp.LOCCTR});
     }
     else if (holds_alternative<formatThree>(v))
     {
@@ -48,7 +46,7 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
             tmp3 = '0' + tmp3;
         }
         string obj = tmp1 + tmp2 + tmp3;
-        RECORDS.push_back(obj);
+        RECORDS.push_back({obj, tmp.LOCCTR});
     }
     else if (holds_alternative<formatFour>(v))
     {
@@ -60,21 +58,22 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
         }
         string tmp2 = intToHex((tmp.x ? 8 : 0) + (tmp.b ? 4 : 0) + (tmp.p ? 2 : 0) +
                                (tmp.e ? 1 : 0));
+
         string tmp3 = intToHex(tmp.address);
         while (tmp3.size() < 5)
         {
             tmp3 = '0' + tmp3;
         }
         string obj = tmp1 + tmp2 + tmp3;
-        RECORDS.push_back(obj);
+        RECORDS.push_back({obj, tmp.LOCCTR});
     }
     else if (holds_alternative<formatData>(v))
     {
         formatData tmp = get<formatData>(v);
         if (tmp.reserved)
         {
-            RECORDS.push_back("SKIP");
-            RECORDS.push_back(to_string(tmp.value));
+            RECORDS.push_back({"SKIP", tmp.LOCCTR});
+            RECORDS.push_back({to_string(tmp.value), tmp.LOCCTR});
         }
         else
         {
@@ -85,7 +84,7 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
                 {
                     obj = '0' + obj;
                 }
-                RECORDS.push_back(obj);
+                RECORDS.push_back({obj, tmp.LOCCTR});
             }
             else
             {
@@ -95,7 +94,7 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
                     {
                         obj = '0' + obj;
                     }
-                    RECORDS.push_back(obj);
+                    RECORDS.push_back({obj, tmp.LOCCTR});
                 }
                 else
                 {
@@ -103,7 +102,7 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
                     {
                         obj = '0' + obj;
                     }
-                    RECORDS.push_back(obj);
+                    RECORDS.push_back({obj, tmp.LOCCTR});
                 }
             }
         }
@@ -111,10 +110,9 @@ void generateRECORDS(VariantType &v, vector<string> &RECORDS)
     return;
 }
 
-string GETRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> &RECORDS, int &PROGRAM_LENGTH, vector<string> &MRECORDS)
+string GETRECORDS(int &START_ADDRESS, string &NAME, vector<pair<string, int>> &RECORDS, int &PROGRAM_LENGTH, vector<string> &MRECORDS)
 {
     string RECORD = "";
-    LOCCTR = START_ADDRESS;
     RECORD += "H";
     while (NAME.size() != 6)
     {
@@ -138,13 +136,26 @@ string GETRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> 
     {
         ll max_text_len = 0x1E;
         ll cnt = 0;
+        ll LOCCTR = RECORDS[i].second;
         string record;
-        while (i < RECORDS.size() and RECORDS[i] != "SKIP" and
-               cnt + ((RECORDS[i].size()) / 2) <= max_text_len)
+        while (i < RECORDS.size() and RECORDS[i].first != "SKIP" and
+               cnt + ((RECORDS[i].first.size()) / 2) <= max_text_len)
         {
-            cnt += ((RECORDS[i].size()) / 2);
-            record += RECORDS[i];
+            cnt += ((RECORDS[i].first.size()) / 2);
+            record += RECORDS[i].first;
+            // if(cnt + ((RECORDS[i].first.size()) / 2) <= max_text_len)
+            // {
             i++;
+            // } else {
+            //     break;
+            // }
+        }
+        if (i < RECORDS.size())
+        {
+            if (RECORDS[i].first != "SKIP")
+            {
+                i--;
+            }
         }
         RECORD += "T";
         tmp = intToHex(LOCCTR);
@@ -160,17 +171,16 @@ string GETRECORDS(int &LOCCTR, int &START_ADDRESS, string &NAME, vector<string> 
         }
         RECORD += tmp;
         RECORD += record;
-        LOCCTR += cnt;
         RECORD += "\n";
         if (i < RECORDS.size())
         {
-            while (RECORDS[i] == "SKIP" and i < RECORDS.size())
+            while (RECORDS[i].first == "SKIP" and i < RECORDS.size())
             {
                 i++;
-                LOCCTR += stoi(RECORDS[i]);
+                // LOCCTR += stoi(RECORDS[i].first);
                 if (i + 1 < RECORDS.size())
                 {
-                    if (RECORDS[i + 1] == "SKIP")
+                    if (RECORDS[i + 1].first == "SKIP")
                     {
                         i++;
                     }

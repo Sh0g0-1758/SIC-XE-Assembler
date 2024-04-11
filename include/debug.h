@@ -46,6 +46,8 @@ void _print(Instruction t)
    _print(t.format);
    cerr << " address> ";
    _print(t.address);
+   cerr << " new_block> ";
+   _print(t.new_block);
    cerr << " block> ";
    _print(t.block);
    cerr << " type> ";
@@ -57,6 +59,8 @@ void _print(formatOne t)
 {
    cerr << "{ opcode> ";
    _print(t.opcode);
+   cerr << " LOCCTR> ";
+   _print(t.LOCCTR);
    cerr << "}";
 }
 void _print(formatTwo t)
@@ -66,7 +70,8 @@ void _print(formatTwo t)
    cerr << " r1> ";
    _print(t.r1);
    cerr << " r2> ";
-   _print(t.r2);
+   cerr << " LOCCTR> ";
+   _print(t.LOCCTR);
    cerr << "}";
 }
 void _print(formatThree t)
@@ -87,6 +92,8 @@ void _print(formatThree t)
    _print(t.e);
    cerr << " displacement> ";
    _print(t.displacement);
+   cerr << " LOCCTR> ";
+   _print(t.LOCCTR);
    cerr << "}";
 }
 void _print(formatFour t)
@@ -107,12 +114,23 @@ void _print(formatFour t)
    _print(t.e);
    cerr << " address> ";
    _print(t.address);
+   cerr << " LOCCTR> ";
+   _print(t.LOCCTR);
    cerr << "}";
 }
+
 void _print(formatData t)
 {
    cerr << "{ data> ";
    _print(t.value);
+   cerr << " reserved> ";
+   _print(t.reserved);
+   cerr << " word> ";
+   _print(t.word);
+   cerr << " loc_ctr> ";
+   _print(t.loc_ctr);
+   cerr << " LOCCTR> ";
+   _print(t.LOCCTR);
    cerr << "}";
 }
 

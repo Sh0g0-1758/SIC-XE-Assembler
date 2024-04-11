@@ -28,11 +28,6 @@ bool is_digits(const string &str)
     return all_of(str.begin(), str.end(), ::isdigit);
 }
 
-bool custom_sort(Instruction a, Instruction b)
-{
-    return a.address < b.address;
-}
-
 void handle_comments(string &line)
 {
     size_t found = line.find('.');
@@ -49,6 +44,18 @@ pair<string, string> get_registers(const string &inputString)
     getline(iss, token1, ',');
     getline(iss, token2);
     return {token1, token2};
+}
+
+bool check_lit_validity(string &lit, vector<pair<string, int>> &LIT_INTERMEDIATE)
+{
+    for (auto it : LIT_INTERMEDIATE)
+    {
+        if (it.first == lit.substr(1))
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 string charToHex(char c)

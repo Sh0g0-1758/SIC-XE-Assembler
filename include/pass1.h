@@ -14,6 +14,7 @@ using namespace std;
         instruction.format = Format::DATA;        \
         instruction.opcode.code = 0;              \
         instruction.opcode.format = Format::DATA; \
+        instruction.new_block = false;            \
     }
 
 void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIATE, map<string, int> &LITTAB, int &LOCCTR, vector<Instruction> &INSTRUCTIONS, map<string, int> &SYMBOL_TABLE, map<string, bool> &SYMBOL_FLAG, int &START_ADDRESS, bool &ORG, vector<string> &MRECORDS, map<string, Opcode> &OPTAB, string &BASE, int &prevLOCCTR, map<string, pair<int, int>> &BLOCK_TABLE, int &BLOCK_NUMBER, string &CURR_BLOCK_NAME, int &TOTAL_BLOCKS, map<int, string> &BLOCK_NAMES, map<string, int> &SYMBOL_BLOCK, map<string, int> &LIT_BLOCK)
@@ -73,6 +74,7 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
             instruction.opcode.format = Format::DATA;
             instruction.type = DataType::BYTE;
             LOCCTR += it.second;
+            instruction.new_block = false;
             INSTRUCTIONS.push_back(instruction);
         }
         LIT_INTERMEDIATE.clear();
@@ -202,7 +204,7 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
                             if (SYMBOL_TABLE.find(equ_toks[i + 1]) != SYMBOL_TABLE.end())
                             {
                                 value = value - SYMBOL_TABLE[equ_toks[i + 1]];
-                                absolute = false;
+                                absolute = true;
                             }
                             else if (is_digits(equ_toks[i + 1]))
                             {
@@ -220,14 +222,15 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
                     i++;
                 }
                 SYMBOL_TABLE[tokens[0]] = value;
-                SYMBOL_BLOCK[tokens[0]] = BLOCK_NUMBER;
                 if (absolute)
                 {
                     SYMBOL_FLAG[tokens[0]] = false;
+                    SYMBOL_BLOCK[tokens[0]] = -1;
                 }
                 else
                 {
                     // Generate Modification Record
+                    SYMBOL_BLOCK[tokens[0]] = BLOCK_NUMBER;
                     string addr = intToHex(LOCCTR);
                     while (addr.size() != 6)
                     {
@@ -274,14 +277,6 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
                 save_error_msg(err_msg);
                 exit(0);
             }
-            instruction.address = LOCCTR;
-            instruction.format = Format::DATA;
-            instruction.opcode.code = 0;
-            instruction.opcode.format = Format::DATA;
-            instruction.type = DataType::BYTE;
-            instruction.data = "X'" + intToHex(SYMBOL_TABLE[tokens[0]]) + "'";
-            LOCCTR += (instruction.data.size() - 3) / 2;
-            INSTRUCTIONS.push_back(instruction);
             return;
         } // early return, hence no else
         SYMBOL_TABLE[tokens[0]] = LOCCTR;
@@ -372,7 +367,7 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
             save_error_msg(err_msg);
             exit(0);
         }
-
+        instruction.new_block = false;
         INSTRUCTIONS.push_back(instruction);
         return;
     }
@@ -405,7 +400,7 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
     // Checking for literals
     if (tokens[2][0] == '=')
     {
-        if (LITTAB.find(tokens[2]) == LITTAB.end())
+        if (LITTAB.find(tokens[2]) == LITTAB.end() and check_lit_validity(tokens[2], LIT_INTERMEDIATE))
         {
             string tmp;
             if (tokens[2][1] == 'C')
@@ -437,6 +432,10 @@ void pass1(string line, bool &NOBASE, vector<pair<string, int>> &LIT_INTERMEDIAT
                 save_error_msg(err_msg);
                 exit(0);
             }
+        }
+        else if (!check_lit_validity(tokens[2], LIT_INTERMEDIATE))
+        {
+            instruction.data = tokens[2].substr(1, tokens[2].length() - 1);
         }
     }
     else

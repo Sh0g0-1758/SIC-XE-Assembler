@@ -10,35 +10,27 @@
 
 map<string, Opcode> OPTAB;
 vector<Instruction> INSTRUCTIONS;
-// SYMBOL TABLE
-map<string, int> SYMBOL_TABLE;
-// UTILITY TO MAP EACH SYMBOL TO ITS CORRECT ADDRESS ACCORDING TO THE BLOCK
-map<string, int> SYMBOL_BLOCK;
-// UTILITY TO CHECK FOR SYMBOLS THAT NEED TO BE PLACED IN THE MODIFICATION RECORD
-map<string, bool> SYMBOL_FLAG;
-// UTILITY TO STORE THE LITERAL TABLE
-vector<pair<string, int>> LIT_INTERMEDIATE;
-// LITERAL TABLE
-map<string, int> LITTAB;
-// UTILITY TO MAP EACH LITERAL TO ITS CORRECT ADDRESS ACCORDING TO THE BLOCK
-map<string, int> LIT_BLOCK;
-// BLOCK TABLE
-map<string, pair<int, int>> BLOCK_TABLE;
-// UTILITY TO MAP BLOCK NUMBER TO BLOCK NAME
-map<int, string> BLOCK_NAMES;
-// UTILITY TO STORE LOC_CTR OF EACH BLOCK
-map<int, int> BLOCK_LOCCTR;
+map<string, int> SYMBOL_TABLE;              // Name of the symbol -> Address
+map<string, int> SYMBOL_BLOCK;              // Name of the symbol -> Block Number
+map<string, bool> SYMBOL_FLAG;              // Name of the symbol -> Need to be modified or not
+vector<pair<string, int>> LIT_INTERMEDIATE; // {Literal, Length}
+map<string, int> LITTAB;                    // Literal -> Address
+map<string, int> LIT_BLOCK;                 // Literal -> Block Number
+map<string, pair<int, int>> BLOCK_TABLE;    // {Block Name, {Block Number, Length}}
+map<int, string> BLOCK_NAMES;               // {Block Number, Block Name}
+map<int, int> BLOCK_LOCCTR;                 // {Block Number, LOCCTR}
+
+vector<VariantType> OBJCODE; // UTILITY TO STORE THE OBJECT CODE
+
+vector<pair<string, int>> RECORDS; // UTILITY TO STORE THE RECORDS
+
+vector<string> MRECORDS; // UTILITY TO STORE THE MODIFICATION RECORDS
+
 // BLOCK RELATED VARS
 int BLOCK_NUMBER = 0;
 int TOTAL_BLOCKS = 0;
 string CURR_BLOCK_NAME = "DEFAULT";
 
-// UTILITY TO STORE THE OBJECT CODE
-vector<VariantType> OBJCODE;
-// UTILITY TO STORE THE RECORDS
-vector<string> RECORDS;
-// UTILITY TO STORE THE MODIFICATION RECORDS
-vector<string> MRECORDS;
 // PROGRAM RELATED GLOBAL VARS
 string NAME;
 int START_ADDRESS;
@@ -65,7 +57,6 @@ int main()
         pre_process(line, OPTAB);
     }
     opcodeFile.close();
-    // debug(OPTAB);
 
     // First pass of the assembler
     string File_Name;
@@ -129,15 +120,21 @@ int main()
     }
     for (auto it : SYMBOL_BLOCK)
     {
+        if (it.second == -1)
+        {
+            continue;
+        }
         SYMBOL_TABLE[it.first] += BLOCK_LOCCTR[it.second];
     }
     for (auto it : LIT_BLOCK)
     {
         LITTAB[it.first] += BLOCK_LOCCTR[it.second];
     }
-    sort(INSTRUCTIONS.begin(), INSTRUCTIONS.end(), custom_sort);
     programFile.close();
-    PROGRAM_LENGTH = LOCCTR - START_ADDRESS;
+    for (auto it : BLOCK_TABLE)
+    {
+        PROGRAM_LENGTH += it.second.second;
+    }
     if (BASE[0] == '*')
     {
         BASE = BASE.substr(1);
@@ -147,32 +144,14 @@ int main()
     {
         SYMBOL_TABLE["BASE"] = SYMBOL_TABLE[BASE];
     }
-    cout << (SPACE);
-    debug(SYMBOL_TABLE);
-    debug(LITTAB);
-    debug(SPACE);
-    debug(INSTRUCTIONS);
-    debug(SPACE);
-    debug(NAME);
-    debug(SPACE);
-    debug(START_ADDRESS);
-    debug(SPACE);
-    debug(LOCCTR);
-    debug(SPACE);
-    debug(PROGRAM_LENGTH);
-    debug(SPACE);
     LOCCTR = START_ADDRESS;
     BLOCK_NUMBER = 0;
-    pass2(INSTRUCTIONS, OBJCODE, LOCCTR, LITTAB, SYMBOL_TABLE, NOBASE, MRECORDS, BLOCK_NUMBER, BLOCK_LOCCTR);
-    for (auto it : OBJCODE)
-    {
-        printVariant(it);
-    }
+    pass2(INSTRUCTIONS, OBJCODE, LOCCTR, LITTAB, SYMBOL_TABLE, NOBASE, MRECORDS, BLOCK_NUMBER, BLOCK_LOCCTR, SYMBOL_FLAG);
     for (auto it : OBJCODE)
     {
         generateRECORDS(it, RECORDS);
     }
-    string ASSEMBLER_RECORD = GETRECORDS(LOCCTR, START_ADDRESS, NAME, RECORDS, PROGRAM_LENGTH, MRECORDS);
+    string ASSEMBLER_RECORD = GETRECORDS(START_ADDRESS, NAME, RECORDS, PROGRAM_LENGTH, MRECORDS);
     removeNewlines(ASSEMBLER_RECORD);
     File_Name = "./../Output/" + get_file_name(File_Name) + "_generated.txt";
     ofstream outputFile(File_Name);
@@ -186,7 +165,5 @@ int main()
     outputFile.close();
 
     cout << "The HEADER Record has been successfully generated." << endl;
-
-    cout << (SPACE);
     exit(0);
 }

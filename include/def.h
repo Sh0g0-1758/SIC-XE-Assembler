@@ -54,6 +54,7 @@ struct Instruction
 struct formatOne
 {
     int opcode;
+    int LOCCTR;
 };
 
 struct formatTwo
@@ -61,6 +62,7 @@ struct formatTwo
     int opcode;
     Register r1;
     Register r2;
+    int LOCCTR;
 };
 
 struct formatThree
@@ -73,6 +75,7 @@ struct formatThree
     bool p;
     bool e;
     int displacement;
+    int LOCCTR;
 };
 
 struct formatFour
@@ -85,6 +88,7 @@ struct formatFour
     bool p;
     bool e;
     int address;
+    int LOCCTR;
 };
 
 struct formatData
@@ -93,6 +97,7 @@ struct formatData
     bool reserved;
     bool word;
     bool loc_ctr;
+    int LOCCTR;
 };
 
 std::string SPACE = "\n<=====================================================================>\n";
