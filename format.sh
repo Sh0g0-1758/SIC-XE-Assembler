@@ -1,1 +1,1 @@
-clang-format -i ./src/assembler.cpp ./include/debug.h ./include/def.h ./include/initialize.h ./include/pass1.h ./include/pass2.h ./include/record.h ./include/utils.h ./tools/color/color.h ./tests/assembler_test.cc CMakeLists.txt ./tests/CMakeLists.txt
+clang-format -i ./src/assembler.cpp ./include/debug.h ./include/def.h ./include/initialize.h ./include/pass1.h ./include/pass2.h ./include/record.h ./include/utils.h ./tools/color/color.h
