@@ -1,1 +1,1 @@
-Invalid register string: 
+Invalid opcode: TABLE2,
