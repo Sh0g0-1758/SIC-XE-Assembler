@@ -1,0 +1,8 @@
+SUM     START   0
+FIRST   LDA     ZERO
+        LDX     =X'01'
+        ADDR    X,A
+        RSUB
+        LTORG
+ZERO    WORD    0
+        END     FIRST

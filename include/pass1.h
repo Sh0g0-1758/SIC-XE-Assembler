@@ -26,7 +26,8 @@ void pass1(string line, bool &NOBASE,
            int &prevLOCCTR, map<string, pair<int, int>> &BLOCK_TABLE,
            int &BLOCK_NUMBER, string &CURR_BLOCK_NAME, int &TOTAL_BLOCKS,
            map<int, string> &BLOCK_NAMES, map<string, int> &SYMBOL_BLOCK,
-           map<string, int> &LIT_BLOCK) {
+           map<string, int> &LIT_BLOCK, string File_Name, bool &has_end,
+           bool &has_rsub) {
     Instruction instruction;
     vector<string> tokens;
     istringstream iss(line);
@@ -81,31 +82,37 @@ void pass1(string line, bool &NOBASE,
         tokens.insert(tokens.begin(), "");
         tokens.push_back("");
     }
-    if (tokens[1] == "RSUB") {
+    if (tokens.size() > 1 and tokens[1] == "RSUB") {
         tokens.push_back("");
     }
     if (tokens.size() == 2) {
         tokens.insert(tokens.begin(), "");
     }
+    if (tokens.size() == 1) {
+        string err_msg = "Invalid line: " + line;
+        save_error_msg(err_msg, File_Name);
+        exit(0);
+    }
     if (tokens[1] == "END") {
         if (SYMBOL_TABLE.find(tokens[2]) == SYMBOL_TABLE.end() or
             SYMBOL_TABLE[tokens[2]] != START_ADDRESS) {
             string err_msg = "Invalid program end: " + tokens[2];
-            save_error_msg(err_msg);
+            save_error_msg(err_msg, File_Name);
             exit(0);
         }
+        has_end = true;
         return;
     }
     if (!tokens[0].empty()) {
         if (SYMBOL_TABLE.find(tokens[0]) != SYMBOL_TABLE.end()) {
             string err_msg = "Duplicate symbol: " + tokens[0];
-            save_error_msg(err_msg);
+            save_error_msg(err_msg, File_Name);
             exit(0);
         }
         if (tokens[1] == "EQU") {
             vector<string> equ_toks;
             if (tokens[2] != "*") {
-                equ_toks = getExpressionTokens(tokens[2]);
+                equ_toks = getExpressionTokens(tokens[2], File_Name);
             }
             if (tokens[2] == "*") {
                 SYMBOL_TABLE[tokens[0]] = LOCCTR;
@@ -114,12 +121,12 @@ void pass1(string line, bool &NOBASE,
                 // Give Expr value here
                 if (equ_toks[0] == "+" or equ_toks[0] == "-") {
                     string err_msg = "INVALID STARTING EQU ARGUMENT.";
-                    save_error_msg(err_msg);
+                    save_error_msg(err_msg, File_Name);
                     exit(0);
                 } else if (SYMBOL_TABLE.find(equ_toks[0]) ==
                            SYMBOL_TABLE.end()) {
                     string err_msg = "INVALID EQU ARGUMENT.";
-                    save_error_msg(err_msg);
+                    save_error_msg(err_msg, File_Name);
                     exit(0);
                 }
                 int value = SYMBOL_TABLE[equ_toks[0]];
@@ -131,7 +138,7 @@ void pass1(string line, bool &NOBASE,
                                     SYMBOL_TABLE.end() or
                                 !is_digits(equ_toks[i + 1])) {
                                 string err_msg = "INVALID EQU ARGUMENT.";
-                                save_error_msg(err_msg);
+                                save_error_msg(err_msg, File_Name);
                                 exit(0);
                             } else {
                                 value = value + stoi(equ_toks[i + 1]);
@@ -147,7 +154,7 @@ void pass1(string line, bool &NOBASE,
                                 absolute = true;
                             } else {
                                 string err_msg = "INVALID EQU ARGUMENT.";
-                                save_error_msg(err_msg);
+                                save_error_msg(err_msg, File_Name);
                                 exit(0);
                             }
                         }
@@ -156,13 +163,13 @@ void pass1(string line, bool &NOBASE,
                             if (SYMBOL_TABLE.find(equ_toks[i + 1]) !=
                                 SYMBOL_TABLE.end()) {
                                 string err_msg = "INVALID EQU ARGUMENT.";
-                                save_error_msg(err_msg);
+                                save_error_msg(err_msg, File_Name);
                                 exit(0);
                             } else if (is_digits(equ_toks[i + 1])) {
                                 value = value - stoi(equ_toks[i + 1]);
                             } else {
                                 string err_msg = "INVALID EQU ARGUMENT.";
-                                save_error_msg(err_msg);
+                                save_error_msg(err_msg, File_Name);
                                 exit(0);
                             }
                         } else {
@@ -175,7 +182,7 @@ void pass1(string line, bool &NOBASE,
                                 absolute = false;
                             } else {
                                 string err_msg = "INVALID EQU ARGUMENT.";
-                                save_error_msg(err_msg);
+                                save_error_msg(err_msg, File_Name);
                                 exit(0);
                             }
                         }
@@ -224,7 +231,7 @@ void pass1(string line, bool &NOBASE,
                 SYMBOL_FLAG[tokens[0]] = false;
             } else {
                 string err_msg = "INVALID EQU ARGUMENT.";
-                save_error_msg(err_msg);
+                save_error_msg(err_msg, File_Name);
                 exit(0);
             }
             return;
@@ -241,7 +248,7 @@ void pass1(string line, bool &NOBASE,
                 LOCCTR = SYMBOL_TABLE[tokens[2]];
             } else {
                 string err_msg = "Invalid ORG argument: " + tokens[2];
-                save_error_msg(err_msg);
+                save_error_msg(err_msg, File_Name);
                 exit(0);
             }
             LOCCTR = SYMBOL_TABLE[tokens[2]];
@@ -290,7 +297,7 @@ void pass1(string line, bool &NOBASE,
             LOCCTR += tokens[2].length() - 3;
         } else {
             string err_msg = "Invalid byte declaration: " + tokens[2];
-            save_error_msg(err_msg);
+            save_error_msg(err_msg, File_Name);
             exit(0);
         }
         instruction.new_block = false;
@@ -299,12 +306,12 @@ void pass1(string line, bool &NOBASE,
     } else if (tokens[1][0] == '+') {
         if (OPTAB.find(tokens[1].substr(1)) == OPTAB.end()) {
             string err_msg = "Invalid opcode: " + tokens[1].substr(1);
-            save_error_msg(err_msg);
+            save_error_msg(err_msg, File_Name);
             exit(0);
         }
     } else if (OPTAB.find(tokens[1]) == OPTAB.end()) {
         string err_msg = "Invalid opcode: " + tokens[1];
-        save_error_msg(err_msg);
+        save_error_msg(err_msg, File_Name);
         exit(0);
     }
     if (tokens[1][0] == '+') {
@@ -338,7 +345,7 @@ void pass1(string line, bool &NOBASE,
                 instruction.data = tmp;
             } else {
                 string err_msg = "Invalid literal declaration: " + tokens[2];
-                save_error_msg(err_msg);
+                save_error_msg(err_msg, File_Name);
                 exit(0);
             }
         } else if (!check_lit_validity(tokens[2], LIT_INTERMEDIATE)) {

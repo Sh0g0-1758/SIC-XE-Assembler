@@ -1,0 +1,11 @@
+SUM     START   0
+ZERO    LDA     ZERO
+        LDX     ONE
+        ADDR    X,A
+        USE     CDATA
+ONE     WORD    1
+        USE
+        RSUB
+        USE     CDATA
+ZERO    WORD    0
+        END     FIRST

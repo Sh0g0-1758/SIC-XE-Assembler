@@ -11,7 +11,8 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE,
            int &LOCCTR, map<string, int> &LITTAB,
            map<string, int> &SYMBOL_TABLE, bool &NOBASE,
            vector<string> &MRECORDS, int &BLOCK_NUMBER,
-           map<int, int> &BLOCK_LOCCTR, map<string, bool> &SYMBOL_FLAG) {
+           map<int, int> &BLOCK_LOCCTR, map<string, bool> &SYMBOL_FLAG,
+           string File_Name) {
     for (auto it : INSTRUCTIONS) {
         // Identify the presence of a new block
         if (it.new_block) {
@@ -38,8 +39,8 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE,
             LOCCTR += 2;
             auto REG = get_registers(it.data);
             obj.opcode = it.opcode.code;
-            obj.r1 = stringToRegister(REG.first);
-            obj.r2 = stringToRegister(REG.second);
+            obj.r1 = stringToRegister(REG.first, File_Name);
+            obj.r2 = stringToRegister(REG.second, File_Name);
             OBJCODE.push_back(obj);
         } else if (it.format == Format::THREE) {
             formatThree obj;
@@ -100,6 +101,11 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE,
                     obj.b = true;
                     obj.displacement =
                         SYMBOL_TABLE[it.data] - SYMBOL_TABLE["BASE"];
+                } else {
+                    string err_msg =
+                        "Displacement can't be reached from PC or BASE.";
+                    save_error_msg(err_msg, File_Name);
+                    exit(0);
                 }
             } else if (LITTAB.find(it.data) != LITTAB.end()) {
                 if (LITTAB[it.data] - LOCCTR < 2047 and
@@ -113,11 +119,16 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE,
                     obj.p = false;
                     obj.b = true;
                     obj.displacement = LITTAB[it.data] - SYMBOL_TABLE["BASE"];
+                } else {
+                    string err_msg =
+                        "Displacement can't be reached from PC or BASE.";
+                    save_error_msg(err_msg, File_Name);
+                    exit(0);
                 }
             } else {
-                string err_msg =
-                    "Displacement can't be reached from PC or BASE.";
-                save_error_msg(err_msg);
+                string err_msg = "INVALID OPERAND " + it.data + " at LOCCTR " +
+                                 to_string(LOCCTR);
+                save_error_msg(err_msg, File_Name);
                 exit(0);
             }
             OBJCODE.push_back(obj);
@@ -170,7 +181,7 @@ void pass2(vector<Instruction> &INSTRUCTIONS, vector<VariantType> &OBJCODE,
                 MRECORDS.push_back(addr);
             } else {
                 string err_msg = "Invalid Symbol or Address out of range.";
-                save_error_msg(err_msg);
+                save_error_msg(err_msg, File_Name);
                 exit(0);
             }
             OBJCODE.push_back(obj);

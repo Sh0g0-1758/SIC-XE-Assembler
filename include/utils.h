@@ -17,11 +17,10 @@ const Color::Modifier cyan(Color::FG_CYAN);
 using VariantType =
     variant<formatOne, formatTwo, formatThree, formatFour, formatData>;
 
-void save_error_msg(string str) {
+void save_error_msg(string str, string File_Name) {
     cout << red << "Assembler Encountered an Error. Diagnostics are stored in"
-         << def << blue << " error_generated.txt\n"
+         << def << blue << " " << File_Name << "\n"
          << def;
-    string File_Name = "./../Output/error_generated.txt";
     ofstream outputFile(File_Name);
 
     if (!outputFile.is_open()) {
@@ -139,7 +138,7 @@ string get_file_name(string filePath) {
     return extractedString;
 }
 
-vector<string> getExpressionTokens(const string &expression) {
+vector<string> getExpressionTokens(const string &expression, string File_Name) {
     vector<string> tokens;
     istringstream iss(expression);
     string token;
@@ -148,7 +147,7 @@ vector<string> getExpressionTokens(const string &expression) {
         if (token.find('*') != string::npos ||
             token.find('/') != string::npos) {
             string err_msg = "Invalid expression: " + expression;
-            save_error_msg(err_msg);
+            save_error_msg(err_msg, File_Name);
             exit(0);
         }
         size_t pos = 0;
@@ -191,7 +190,7 @@ unordered_map<string, Register> registerMap = {
     {"B", Register::B}, {"S", Register::S},   {"T", Register::T},
     {"F", Register::F}, {"PC", Register::PC}, {"SW", Register::SW}};
 
-Register stringToRegister(const string &str) {
+Register stringToRegister(const string &str, string File_Name) {
     // helper function to convert the string to register
     if (str.empty()) {
         auto it = registerMap.find("A");
@@ -202,7 +201,7 @@ Register stringToRegister(const string &str) {
         return it->second;
     } else {
         string err_msg = "Invalid register string: " + str;
-        save_error_msg(err_msg);
+        save_error_msg(err_msg, File_Name);
         exit(0);
     }
 }

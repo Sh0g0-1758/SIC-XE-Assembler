@@ -8,7 +8,7 @@ using namespace std;
 #include "utils.h"
 
 void program_initialisation(string line, string &NAME, int &START_ADDRESS,
-                            int &LOCCTR) {
+                            int &LOCCTR, string File_Name) {
     vector<string> tokens;
     istringstream iss(line);
     string token;
@@ -17,7 +17,7 @@ void program_initialisation(string line, string &NAME, int &START_ADDRESS,
     }
     if (tokens[1] != "START") {
         string err_msg = "Invalid program start: " + tokens[1];
-        save_error_msg(err_msg);
+        save_error_msg(err_msg, File_Name);
         exit(0);
     }
     NAME = tokens[0];
@@ -25,7 +25,7 @@ void program_initialisation(string line, string &NAME, int &START_ADDRESS,
     LOCCTR = START_ADDRESS;
 }
 
-void pre_process(string line, map<string, Opcode> &OPTAB) {
+void pre_process(string line, map<string, Opcode> &OPTAB, string File_Name) {
     Opcode opcode;
     vector<string> tokens;
     istringstream iss(line);
@@ -44,14 +44,14 @@ void pre_process(string line, map<string, Opcode> &OPTAB) {
             opcode.format = Format::THREE;
         } else {
             string err_msg = "Invalid format value: " + tokens[1];
-            save_error_msg(err_msg);
+            save_error_msg(err_msg, File_Name);
             exit(0);
         }
         OPTAB[tokens[0]] = opcode;
     } else {
         string err_msg =
             "Insufficient data values for opcode: " + tokens.size();
-        save_error_msg(err_msg);
+        save_error_msg(err_msg, File_Name);
         exit(0);
     }
 }

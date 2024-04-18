@@ -42,9 +42,45 @@ TEST(Program4_Test, CompareFiles) {
     ASSERT_TRUE(compareFiles(filePath1, filePath2));
 }
 
-TEST(ErrorProgram_Test, CompareFiles) {
-    string filePath1 = "./../../Output/error_expected.txt";
-    string filePath2 = "./../../Output/error_generated.txt";
+TEST(Program5_Test, CompareFiles) {
+    string filePath1 = "./../../Output/test_program5_expected.txt";
+    string filePath2 = "./../../Output/test_program5_generated.txt";
+    ASSERT_TRUE(compareFiles(filePath1, filePath2));
+}
+
+TEST(Program6_Test, CompareFiles) {
+    string filePath1 = "./../../Output/test_program6_expected.txt";
+    string filePath2 = "./../../Output/test_program6_generated.txt";
+    ASSERT_TRUE(compareFiles(filePath1, filePath2));
+}
+
+TEST(ErrorProgram1_Test, CompareFiles) {
+    string filePath1 = "./../../Output/error_program1_expected.txt";
+    string filePath2 = "./../../Output/error_program1_generated.txt";
+    ASSERT_TRUE(compareFiles(filePath1, filePath2));
+}
+
+TEST(ErrorProgram2_Test, CompareFiles) {
+    string filePath1 = "./../../Output/error_program2_expected.txt";
+    string filePath2 = "./../../Output/error_program2_generated.txt";
+    ASSERT_TRUE(compareFiles(filePath1, filePath2));
+}
+
+TEST(ErrorProgram3_Test, CompareFiles) {
+    string filePath1 = "./../../Output/error_program3_expected.txt";
+    string filePath2 = "./../../Output/error_program3_generated.txt";
+    ASSERT_TRUE(compareFiles(filePath1, filePath2));
+}
+
+TEST(ErrorProgram4_Test, CompareFiles) {
+    string filePath1 = "./../../Output/error_program4_expected.txt";
+    string filePath2 = "./../../Output/error_program4_generated.txt";
+    ASSERT_TRUE(compareFiles(filePath1, filePath2));
+}
+
+TEST(ErrorProgram5_Test, CompareFiles) {
+    string filePath1 = "./../../Output/error_program5_expected.txt";
+    string filePath2 = "./../../Output/error_program5_generated.txt";
     ASSERT_TRUE(compareFiles(filePath1, filePath2));
 }
 

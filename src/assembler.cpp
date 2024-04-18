@@ -43,6 +43,12 @@ int prevLOCCTR;
 string BASE;
 
 int main() {
+    // Getting File Name
+    string File_Name;
+    cout << cyan << "Enter the file path> " << def;
+    cin >> File_Name;
+    string RECORD_FILE_NAME =
+        "./../Output/" + get_file_name(File_Name) + "_generated.txt";
     // Processing the opcodes
     ifstream opcodeFile("../tools/data/opcode.info");
     if (!opcodeFile.is_open()) {
@@ -52,23 +58,22 @@ int main() {
     string line;
     getline(opcodeFile, line); // Skipping the header
     while (getline(opcodeFile, line)) {
-        pre_process(line, OPTAB);
+        pre_process(line, OPTAB, RECORD_FILE_NAME);
     }
     opcodeFile.close();
 
     // First pass of the assembler
-    string File_Name;
-    cout << cyan << "Enter the file path> " << def;
-    cin >> File_Name;
     ifstream programFile(File_Name);
     if (!programFile.is_open()) {
         cout << red << "Failed to open the file." << def << endl;
         exit(0);
     }
     getline(programFile, line); // Starting address and program name
-    program_initialisation(line, NAME, START_ADDRESS, LOCCTR);
+    program_initialisation(line, NAME, START_ADDRESS, LOCCTR, RECORD_FILE_NAME);
     BLOCK_TABLE["DEFAULT"] = {0, 0};
     BLOCK_NAMES[0] = "DEFAULT";
+    bool has_end = false;
+    bool has_rsub = false;
     while (getline(programFile, line)) {
         handle_comments(line);
         remove_whitespaces(line);
@@ -78,7 +83,13 @@ int main() {
         pass1(line, NOBASE, LIT_INTERMEDIATE, LITTAB, LOCCTR, INSTRUCTIONS,
               SYMBOL_TABLE, SYMBOL_FLAG, START_ADDRESS, ORG, MRECORDS, OPTAB,
               BASE, prevLOCCTR, BLOCK_TABLE, BLOCK_NUMBER, CURR_BLOCK_NAME,
-              TOTAL_BLOCKS, BLOCK_NAMES, SYMBOL_BLOCK, LIT_BLOCK);
+              TOTAL_BLOCKS, BLOCK_NAMES, SYMBOL_BLOCK, LIT_BLOCK,
+              RECORD_FILE_NAME, has_end, has_rsub);
+    }
+    if (!has_end) {
+        string err_msg = "END statement not found.";
+        save_error_msg(err_msg, RECORD_FILE_NAME);
+        exit(0);
     }
     BLOCK_TABLE[CURR_BLOCK_NAME].second = LOCCTR;
     if (LIT_INTERMEDIATE.size() != 0) {
@@ -132,15 +143,14 @@ int main() {
     LOCCTR = START_ADDRESS;
     BLOCK_NUMBER = 0;
     pass2(INSTRUCTIONS, OBJCODE, LOCCTR, LITTAB, SYMBOL_TABLE, NOBASE, MRECORDS,
-          BLOCK_NUMBER, BLOCK_LOCCTR, SYMBOL_FLAG);
+          BLOCK_NUMBER, BLOCK_LOCCTR, SYMBOL_FLAG, RECORD_FILE_NAME);
     for (auto it : OBJCODE) {
         generateRECORDS(it, RECORDS);
     }
     string ASSEMBLER_RECORD =
         GETRECORDS(START_ADDRESS, NAME, RECORDS, PROGRAM_LENGTH, MRECORDS);
     removeNewlines(ASSEMBLER_RECORD);
-    File_Name = "./../Output/" + get_file_name(File_Name) + "_generated.txt";
-    ofstream outputFile(File_Name);
+    ofstream outputFile(RECORD_FILE_NAME);
 
     if (!outputFile.is_open()) {
         cout << red << "Failed to open the file." << def << endl;
