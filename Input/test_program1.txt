@@ -1,8 +1,8 @@
 SUM     START   0
 FIRST   LDA     #0
-	    LDX     #1
+	LDX     #1
 LOOP    ADDR    X,A
-	    TIX     #11
-	    JLT     LOOP
-	    RSUB
-	    END     FIRST
+	TIX     #11
+	JLT     LOOP
+	RSUB
+	END     FIRST
