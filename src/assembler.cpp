@@ -89,7 +89,7 @@ int main() {
     if (!has_end) {
         string err_msg = "END statement not found.";
         save_error_msg(err_msg, RECORD_FILE_NAME);
-        exit(0);
+        raise(SIGSEGV);
     }
     BLOCK_TABLE[CURR_BLOCK_NAME].second = LOCCTR;
     if (LIT_INTERMEDIATE.size() != 0) {
