@@ -14,5 +14,3 @@ echo "./../Input/error_program4.txt" | ./assembler
 echo "./../Input/error_program5.txt" | ./assembler
 cd tests
 ./assembler_test
-
-./../Input/error_program5.txt
